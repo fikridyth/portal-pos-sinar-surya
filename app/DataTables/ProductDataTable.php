@@ -2,7 +2,7 @@
 
 namespace App\DataTables;
 
-use App\Models\Supplier;
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
@@ -12,7 +12,7 @@ use Yajra\DataTables\Html\Editor\Editor;
 use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
-class SupplierDataTable extends DataTable
+class ProductDataTable extends DataTable
 {
     /**
      * Build the DataTable class.
@@ -27,7 +27,10 @@ class SupplierDataTable extends DataTable
             return $row->created_at->setTimezone('Asia/Jakarta')->format('d F Y, H:i:s');
         })
         ->editColumn('nama', function ($row) {
-            return '<a href="' . route('index-supplier', $row->id) . '">' . $row->nama . '</a>';
+            return $row->nama . '/' . $row->unit_jual;
+        })
+        ->editColumn('harga_jual', function ($row) {
+            return number_format($row->harga_jual);
         })
         ->rawColumns(['nama']);
     }
@@ -35,7 +38,7 @@ class SupplierDataTable extends DataTable
     /**
      * Get the query source of dataTable.
      */
-    public function query(Supplier $model): QueryBuilder
+    public function query(Product $model): QueryBuilder
     {
         return $model->newQuery();
     }
@@ -46,7 +49,7 @@ class SupplierDataTable extends DataTable
     public function html(): HtmlBuilder
     {
         return $this->builder()
-            ->setTableId('supplier-table')
+            ->setTableId('product-table')
             ->columns($this->getColumns())
             ->minifiedAjax()
             //->dom('Bfrtip')
@@ -70,10 +73,15 @@ class SupplierDataTable extends DataTable
     {
         return [
             // Column::make('DT_RowIndex')->title('No.')->searchable(false)->orderable(false)->addClass('text-center'),
-            Column::make('nama')->title('NAMA')->addClass('text-black'),
-            Column::make('nomor')->title('NOMOR')->addClass('text-center text-black'),
-            Column::make('alamat1')->title('ALAMAT 1')->addClass('text-center text-black'),
-            Column::make('alamat2')->title('ALAMAT 2')->addClass('text-center text-black'),
+            Column::make('kode')->title('KODE')->addClass('text-center text-black'),
+            Column::make('nama')->title('NAMA BARANG')->addClass('text-black'),
+            Column::make('harga_jual')->title('HARGA')->addClass('text-end text-black'),
+            // Column::make('created_at')->title('Tanggal Dibuat')->addClass('text-center'),
+            // Column::computed('action')
+            //     ->exportable(false)
+            //     ->printable(false)
+            //     ->width(60)
+            //     ->addClass('text-center'),
         ];
     }
 
@@ -82,6 +90,6 @@ class SupplierDataTable extends DataTable
      */
     protected function filename(): string
     {
-        return 'Supplier_' . date('YmdHis');
+        return 'Product_' . date('YmdHis');
     }
 }

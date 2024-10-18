@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\ProductDataTable;
 use App\DataTables\SupplierDataTable;
+use App\Models\Hold;
 use App\Models\Penjualan;
 use App\Models\Product;
 use App\Models\ProductSecond;
@@ -20,6 +22,7 @@ class HomeController extends Controller
         return view('dashboard', compact('title'));
     }
 
+    // pembelian
     public function listPembelian()
     {
         $title = 'List Pembelian';
@@ -60,16 +63,22 @@ class HomeController extends Controller
         }
         $getNomor = str_pad($sequence, 6, 0, STR_PAD_LEFT);
 
-        $penjualan = Penjualan::create([
-            'tanggal' => Carbon::now()->setTimezone('Asia/Jakarta')->format('Y-m-d'),
-            'jam' => Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i:s'),
-            'detail' => json_encode($products),
-            'total' => $request->grandTotal,
-            'diskon' => $request->grandDiskon,
-            'grand_total' => $request->grandTotal - $request->grandDiskon,
-            'no' => $getNomor,
-            'created_by' => auth()->user()->name
-        ]);
+        // dd($products);
+        if ($products !== []) {
+            $penjualan = Penjualan::create([
+                'tanggal' => Carbon::now()->setTimezone('Asia/Jakarta')->format('Y-m-d'),
+                'jam' => Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i:s'),
+                'detail' => json_encode($products),
+                'total' => $request->grandTotal,
+                'diskon' => $request->grandDiskon,
+                'grand_total' => $request->grandTotal - $request->grandDiskon,
+                'no' => $getNomor,
+                'created_by' => auth()->user()->name
+            ]);
+        } else {
+            return response()->json(['error' => 'No data scanned!']);
+        }
+
 
         $printData = $this->formatPrintData($penjualan, $products);
         
@@ -124,6 +133,54 @@ class HomeController extends Controller
         return $output;
     }
 
+    // hold
+    public function holdPenjualan(Request $request)
+    {
+        $products = $request->input('products');
+
+        // dd($products);
+        if ($products !== []) {
+            Hold::create([
+                'tanggal' => Carbon::now()->setTimezone('Asia/Jakarta')->format('Y-m-d'),
+                'jam' => Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i:s'),
+                'detail' => json_encode($products),
+                'total' => $request->grandTotal,
+                'diskon' => $request->grandDiskon,
+                'grand_total' => $request->grandTotal - $request->grandDiskon,
+                'created_by' => auth()->user()->name
+            ]);
+        } else {
+            return response()->json(['error' => 'No data scanned!']);
+        }
+        
+        return response()->json(['success' => 'Data Berhasil di Hold!']);
+    }
+
+    public function listHold()
+    {
+        $title = 'List Hold';
+        $penjualans = Hold::whereNull('is_used')->get();
+
+        return view('list-hold', compact('title', 'penjualans'));
+    }
+
+    public function indexHold($id)
+    {
+        $title = 'Index Hold';
+        $hold = Hold::find($id);
+
+        return view('index-hold', compact('title', 'hold'));
+    }
+
+    // product
+    public function listBarang(ProductDataTable $dataTable)
+    {
+        $title = 'List Barang';
+
+        return $dataTable->render('list-barang', compact('title'));
+    }
+
+    // supplier
     public function listSupplier(SupplierDataTable $dataTable)
     {
         $title = 'List Supplier';
@@ -139,6 +196,7 @@ class HomeController extends Controller
         return view('index-supplier', compact('title', 'supplier'));
     }
 
+    // return
     public function storeReturnData(Request $request)
     {
         // get nomor return

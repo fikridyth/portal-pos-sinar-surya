@@ -55,4 +55,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/index-supplier/{id}', [HomeController::class, 'indexSupplier'])->name('index-supplier');
     Route::post('/store-return-data', [HomeController::class, 'storeReturnData'])->name('store-return-data');
 
+    // list barang
+    Route::get('/list-barang', [HomeController::class, 'listBarang'])->name('list-barang');
+    
+    // list hold
+    Route::post('/penjualan/hold', [HomeController::class, 'holdPenjualan'])->name('penjualan.hold');
+    Route::get('/list-hold', [HomeController::class, 'listHold'])->name('list-hold');
+    Route::get('/index-hold/{id}', [HomeController::class, 'indexHold'])->name('index-hold');
 });

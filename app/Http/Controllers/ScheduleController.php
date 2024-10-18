@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Penjualan;
+use App\Models\Product;
+use App\Models\ProductSecond;
 use App\Models\ProductStockSecond;
 use Exception;
 use Illuminate\Http\Request;
@@ -17,11 +19,19 @@ class ScheduleController extends Controller
             foreach ($penjualans as $penjualan) {
                 $details = json_decode($penjualan->detail, true);
                 foreach ($details as $detail) {
-                    // $totalOrder = $detail['order'];
                     $kode = $detail['kode'];
+                    $order = $detail['order'];
                     $nama = explode('/', $detail['nama']);
                     $getUnitJual = str_replace('P', '', $nama[1]);
     
+                    // update stok product di db pos dan server
+                    $productPos = Product::where('kode', $kode)->first();
+                    $productPos->update(['stok' => $productPos->stok - $order]);
+    
+                    $productServer = ProductSecond::where('kode', $kode)->first();
+                    $productServer->update(['stok' => $productServer->stok - $order]);
+
+                    // buat array untuk update product stock
                     if (isset($productOrders[$kode])) {
                         // If it exists, add to the total order
                         $productOrders[$kode]['order'] += $detail['order'];
@@ -37,14 +47,25 @@ class ScheduleController extends Controller
             }
     
             $allProducts = array_values($productOrders);
+            // dd($allProducts);
             foreach ($allProducts as $product) {
-                ProductStockSecond::create([
-                    'tipe' => 'POS',
-                    'tanggal' => $penjualans[0]->tanggal,
-                    'kode' => $product['kode'],
-                    'total' => -$product['order'],
-                    'unit_jual' => $product['unit_jual']
-                ]);
+                if ($product['order'] > 0) {
+                    ProductStockSecond::create([
+                        'tipe' => 'POS',
+                        'tanggal' => $penjualans[0]->tanggal,
+                        'kode' => $product['kode'],
+                        'total' => -$product['order'],
+                        'unit_jual' => $product['unit_jual']
+                    ]);
+                } else {
+                    ProductStockSecond::create([
+                        'tipe' => 'POS',
+                        'tanggal' => $penjualans[0]->tanggal,
+                        'kode' => $product['kode'],
+                        'total' => abs($product['order']),
+                        'unit_jual' => $product['unit_jual']
+                    ]);
+                }
             }
     
             // update is_send

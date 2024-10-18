@@ -28,24 +28,35 @@
                     </tr>
                 </thead>
                 <tbody class="top">
+                    @foreach (json_decode($hold->detail) as $detail)
+                    <tr>
+                        <td class="text-center">{{ $detail->label }}</td>
+                        <td class="text-center">{{ $detail->kode_alternatif }}</td>
+                        <td>{{ $detail->nama }}</td>
+                        <td class="text-end">{{ $detail->order }}</td>
+                        <td class="text-end">{{ number_format($detail->harga) }}</td>
+                        <td class="text-end">{{ number_format($detail->diskon) }}</td>
+                        <td class="text-end">{{ number_format($detail->grand_total) }}</td>
+                    </tr>
+                    @endforeach
                 </tbody>
                 <tbody class="bottom">
                     <tr>
-                        <td class="text-end" id="big-total" colspan="5" style="font-size: 56px;">0</td>
+                        <td class="text-end" id="big-total" colspan="5" style="font-size: 56px;">{{ number_format($hold->grand_total) }}</td>
                         <td class="text-end" colspan="2">
                             <div class="d-flex justify-content-between">
                                 <div>JUMLAH</div>
-                                <div id="small-jumlah">0</div>
+                                <div id="small-jumlah">{{ number_format($hold->total) }}</div>
                             </div>
                             <hr style="border: 1px solid white; opacity: 1; margin: 2px 0 4px 0">
                             <div class="d-flex justify-content-between">
                                 <div>DISKON</div>
-                                <div id="small-diskon">0</div>
+                                <div id="small-diskon">{{ number_format($hold->diskon) }}</div>
                             </div>
                             <hr style="border: 1px solid white; opacity: 1; margin: 2px 0 4px 0">
                             <div class="d-flex justify-content-between">
                                 <div>TOTAL</div>
-                                <div id="small-total">0</div>
+                                <div id="small-total">{{ number_format($hold->grand_total) }}</div>
                             </div>
                         </td>
                     </tr>
@@ -328,9 +339,7 @@
                             document.getElementById("small-total").innerHTML = number_format(grandTotal - grandDiskon);
 
                             productDetails.push({
-                                label: scanLabel,
                                 kode: data.product.kode,
-                                kode_alternatif: data.product.kode_alternatif,
                                 nama: data.product.nama + '/' + data.product.unit_jual,
                                 harga: displayHarga,
                                 order: totalHarga / data.product.harga_jual,
