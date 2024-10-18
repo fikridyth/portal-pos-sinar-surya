@@ -12,6 +12,7 @@ use App\Http\Controllers\PiutangController;
 use App\Http\Controllers\PpnController;
 use App\Http\Controllers\PreOrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
@@ -36,9 +37,22 @@ Route::name('auth.')->middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::redirect('/', '/dashboard');
     Route::get('/dashboard', [HomeController::class, 'index'])->name('index');
-    Route::get('/list-pembelian', [HomeController::class, 'listPembelian'])->name('list-pembelian');
-    Route::post('/print-pembelian', [HomeController::class, 'printPembelian'])->name('print-pembelian');
     Route::get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
+    // scan barcode, print dan subtotal
     Route::get('/get-detail-products/{kode}', [HomeController::class, 'getDetailProducts']);
     Route::post('/penjualan/store', [HomeController::class, 'storePenjualan'])->name('penjualan.store');
+
+    // list pembelian dan print
+    Route::get('/list-pembelian', [HomeController::class, 'listPembelian'])->name('list-pembelian');
+    Route::post('/print-pembelian', [HomeController::class, 'printPembelian'])->name('print-pembelian');
+
+    // kirim data pembelian ke server
+    Route::post('/send-penjualan', [ScheduleController::class, 'sendPenjualan'])->name('send-penjualan');
+
+    // list supplier
+    Route::get('/list-supplier', [HomeController::class, 'listSupplier'])->name('list-supplier');
+    Route::get('/index-supplier/{id}', [HomeController::class, 'indexSupplier'])->name('index-supplier');
+    Route::post('/store-return-data', [HomeController::class, 'storeReturnData'])->name('store-return-data');
+
 });

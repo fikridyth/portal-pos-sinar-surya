@@ -27,19 +27,13 @@ class SupplierDataTable extends DataTable
             return $row->created_at->setTimezone('Asia/Jakarta')->format('d F Y, H:i:s');
         })
         ->editColumn('nama', function ($row) {
-            return '<a href="' . route('master.supplier.show', $row->id) . '">' . $row->nama . '</a>';
+            return '<a href="' . route('index-supplier', $row->id) . '">' . $row->nama . '</a>';
         })
         ->addColumn('action', function ($row) {
-            $btnEdit = '<a href="' . route('master.supplier.edit', $row->id) . '" class="btn btn-warning btn-sm"><i class="fa fa-pen "></i></a>';
-            $btnDelete = '<a href="#" class="btn btn-danger btn-sm" onclick="deleteData(' . $row->id . ')" ><i class="fa fa-trash"></i></a>';
-
-            $button = '<form id="delete-form-' . $row->id . '" action="' . route('master.supplier.destroy', $row->id) . '" method="POST" style="display: none;">';
-            $button .= csrf_field();
-            $button .= method_field('DELETE');
-            $button .= '</form>';
-            $button .= '<div class="d-flex justify-content-center">';
-            $button .= '<div style="margin-right: 5px;">' . $btnEdit . '</div>';
-            $button .= $btnDelete . '</div>';
+            $btnView = '<a href="' . route('index-supplier', $row->id) . '" class="btn btn-primary btn-sm">PILIH</a>';
+            $button = '<div class="d-flex justify-content-center">';
+            $button .= '<div>' . $btnView . '</div>';
+            $button .= '</div>';
             return $button;
         })
         ->rawColumns(['nama', 'action']);
@@ -82,11 +76,11 @@ class SupplierDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::make('DT_RowIndex')->title('No.')->searchable(false)->orderable(false)->addClass('text-center'),
-            Column::make('nama'),
-            Column::make('nomor')->addClass('text-center'),
-            Column::make('alamat1')->addClass('text-center'),
-            Column::make('alamat2')->addClass('text-center'),
+            // Column::make('DT_RowIndex')->title('No.')->searchable(false)->orderable(false)->addClass('text-center'),
+            Column::make('nama')->addClass('text-black'),
+            Column::make('nomor')->addClass('text-center text-black'),
+            Column::make('alamat1')->addClass('text-center text-black'),
+            Column::make('alamat2')->addClass('text-center text-black'),
             // Column::make('created_at')->title('Tanggal Dibuat')->addClass('text-center'),
             // Column::computed('action')
             //     ->exportable(false)

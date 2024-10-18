@@ -5,9 +5,9 @@
         <div style="width: 90%;">
             <div class="d-flex justify-content-between align-items-center mt-2 mb-2"
                 style="color: white; border: 2px solid white">
-                <p style="margin-left: 8%;"></p>
+                <p class="mx-2 mt-n1 mb-n1" style="margin-top: 0; margin-bottom: 0;">KEMBALI BARANG SUPPLIER <br>{{ $supplier->nama }}</p>
                 <h4>SINAR SURYA</h4>
-                <h6 class="mx-3">T = TOMBOL</h6>
+                <h6 class="mx-3">T = TOMBOL | F2 = BATAL</h6>
             </div>
             <div class="d-flex justify-content-between">
                 <h1 id="big-name" style="color: white;"></h1>
@@ -254,12 +254,21 @@
 
                             productDetails.push({
                                 kode: data.product.kode,
-                                nama: data.product.nama + '/' + data.product.unit_jual,
-                                harga: data.product.harga_jual,
+                                nama: data.product.nama,
+                                unit_jual: data.product.unit_jual,
+                                stok: data.product.stok,
                                 order: totalHarga / data.product.harga_jual,
-                                total: totalHarga,
-                                diskon: totalDiskon,
-                                grand_total: totalHarga - totalDiskon
+                                price: data.product.harga_pokok,
+                                field_total: totalHarga,
+                                kode_sumber: data.product.kode_sumber,
+                                diskon1: 0,
+                                diskon2: 0,
+                                diskon3: 0,
+                                penjualan_rata: 0,
+                                waktu_kunjungan: 0,
+                                stok_minimum: 0,
+                                stok_maksimum: 0,
+                                is_ppn: 0,
                             });
 
                             // kembalikan focus ke barcode
@@ -332,17 +341,18 @@
 
             // focus barcode
             if (event.key === 'F2') {
-                window.location.href = '/logout';
+                window.location.href = '/dashboard';
             }
         });
 
         function submitData() {
             const detail = JSON.stringify({
-                products: productDetails,
+                detail: productDetails,
+                supplier: {{ $supplier->id }},
                 grandTotal: grandTotal,
-                grandDiskon: grandDiskon
+                // grandDiskon: grandDiskon
             });
-            fetch('{{ route('penjualan.store') }}', {
+            fetch('{{ route('store-return-data') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -358,26 +368,7 @@
                     return response.json(); // or response.text() based on your response
                 })
                 .then(data => {
-                    console.log(data);
-                    const topTbody = document.querySelector('tbody.top');
-                    const newRow2 = document.createElement('tr');
-                    newRow2.innerHTML = `
-                    <td></td><td></td><td></td><td class="text-end">1</td><td class="text-end">0</td><td class="text-end">0</td><td class="text-end">0</td>
-                `;
-                    const newRow = document.createElement('tr');
-                    newRow.innerHTML = `
-
-                    <td class="text-center">STL</td>
-                    <td class="text-center"></td>
-                    <td>SUBTOTAL</td>
-                    <td class="text-end">1</td>
-                    <td class="text-end">${number_format(data.penjualan.grand_total)}</td>
-                    <td class="text-end">0</td>
-                    <td class="text-end" id="value-total">${number_format(data.penjualan.grand_total)}</td>
-                `;
-                    topTbody.appendChild(newRow2);
-                    topTbody.appendChild(newRow);
-
+                    // alert(data)
                     printReceipt(data.printData);
                 })
                 .catch(error => {

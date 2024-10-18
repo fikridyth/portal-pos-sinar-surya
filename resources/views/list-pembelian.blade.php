@@ -1,27 +1,51 @@
 @extends('main')
 
+@section('styles')
+<style>
+    .table tbody td {
+        background-color: white;
+        border: 3px solid #eee;
+        border-bottom: none;
+        border-top: none;
+        color: #eee;
+        font-size: 16px;
+        padding: 5px; 
+        line-height: 1.2; 
+    }
+    
+    .table tbody.bottom td {
+        background-color: white;
+        border: 3px solid #eee;
+        color: #eee;
+        font-size: 16px;
+        height: 5px;
+        padding: 5px;
+    }
+</style>
+@endsection
+
 @section('content')
     <div class="container">
         <div class="row w-100 mt-5">
             <h2 class="text-center mb-4" style="color: white;">LIST PEMBELIAN</h2>
             <div class="form-group col-4">
-                <div style="overflow-x: auto; height: 600px; border: 1px solid #ccc;">
+                <div style="overflow-x: auto; height: 600px; border: 1px solid #ccc; background-color: white;">
                     <table class="table table-bordered" style="width: 100%; table-layout: auto;">
                         <thead>
                             <tr>
-                                <th class="text-center">KASIR</th>
-                                <th class="text-center">STRUK</th>
-                                <th class="text-center">JAM</th>
-                                <th class="text-center">PILIH</th>
+                                <th class="text-center text-black">KASIR</th>
+                                <th class="text-center text-black">STRUK</th>
+                                <th class="text-center text-black">JAM</th>
+                                <th class="text-center text-black">PILIH</th>
                             </tr>
                         </thead>
                         <tbody id="preorderTableBody">
                             @foreach ($penjualans as $penjualan)
                                 <tr data-id="{{ $penjualan->id }}">
-                                    <td class="text-center">{{ $penjualan->created_by }}</td>
-                                    <td class="text-center">{{ $penjualan->no }}</td>
-                                    <td class="text-center">{{ $penjualan->jam }}</td>
-                                    <td class="text-center"><input type="checkbox" class="preorder-checkbox" data-detail="{{ json_encode($penjualan->detail) }}"></td>
+                                    <td class="text-center text-black">{{ $penjualan->created_by }}</td>
+                                    <td class="text-center text-black">{{ $penjualan->no }}</td>
+                                    <td class="text-center text-black">{{ $penjualan->jam }}</td>
+                                    <td class="text-center text-black"><input type="checkbox" class="preorder-checkbox" data-detail="{{ json_encode($penjualan->detail) }}"></td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -30,15 +54,15 @@
             </div>
 
             <div class="form-group col-8">
-                <div style="overflow-x: auto; height: 600px; border: 1px solid #ccc;">
+                <div style="overflow-x: auto; height: 600px; border: 1px solid #ccc; background-color: white;">
                     <table class="table table-bordered" style="width: 100%; table-layout: auto;">
                         <thead>
                             <tr>
-                                <th class="text-center">NAMA BARANG</th>
-                                <th class="text-center">JUMLAH</th>
-                                <th class="text-center">HARGA</th>
-                                <th class="text-center">DISKON</th>
-                                <th class="text-center">TOTAL</th>
+                                <th class="text-center text-black">NAMA BARANG</th>
+                                <th class="text-center text-black">JUMLAH</th>
+                                <th class="text-center text-black">HARGA</th>
+                                <th class="text-center text-black">DISKON</th>
+                                <th class="text-center text-black">TOTAL</th>
                             </tr>
                         </thead>
                         <tbody id="orderDetailTableBody">
@@ -74,11 +98,11 @@
                         // console.log(item);
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
-                            <td>${item.nama}</td>
-                            <td class="text-center">${item.order}</td>
-                            <td class="text-end">${number_format(item.harga)}</td>
-                            <td class="text-end">${number_format(item.diskon)}</td>
-                            <td class="text-end">${number_format(item.grand_total)}</td>
+                            <td class="text-black">${item.nama}</td>
+                            <td class="text-center text-black">${item.order}</td>
+                            <td class="text-end text-black">${number_format(item.harga)}</td>
+                            <td class="text-end text-black">${number_format(item.diskon)}</td>
+                            <td class="text-end text-black">${number_format(item.grand_total)}</td>
                         `;
                         tbody.appendChild(newRow);
                     });
