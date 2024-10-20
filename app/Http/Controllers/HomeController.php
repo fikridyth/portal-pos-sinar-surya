@@ -35,6 +35,9 @@ class HomeController extends Controller
     {
         // $product = Product::where('kode_alternatif', $kode)->first();
         $product = Product::where('kode_alternatif', $kode)->first();
+        if (!isset($product)) {
+            return response()->json(['error' => 'Barcode Not Found!']);
+        }
 
         return response()->json(['product' => $product]);
     }
