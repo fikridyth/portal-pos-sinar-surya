@@ -1,5 +1,30 @@
 @extends('main')
 
+@section('styles')
+    <style>
+        .modal-password {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4); 
+        }
+
+        .modal-content-password {
+            background-color: #fefefe;
+            margin: 15% auto; 
+            padding: 20px;
+            border: 1px solid #888;
+            width: 15%; 
+        }
+    </style>
+@endsection
+
 @section('content')
     <div class="d-flex justify-content-center">
         <div style="width: 90%;">
@@ -11,9 +36,16 @@
             </div>
             <div class="d-flex justify-content-between">
                 <h1 id="big-name" style="color: white;"></h1>
-                <input type="text" id="barcodeInput" style="width: 1px; opacity: 0;" autofocus>
+                <input type="text" id="barcodeInput" style="width: 1px; opacity: 0;">
                 <input type="text" id="barcodeInputVoid" style="width: 1px; opacity: 0;">
                 <input type="text" id="barcodeInputReturn" style="width: 1px; opacity: 0;">
+
+                <div id="passwordModal" class="modal-password" style="display:none;">
+                    <div class="modal-content-password">
+                        <h5>MASUKAN PASSWORD</h5>
+                        <input type="password" id="passwordInput"/>
+                    </div>
+                </div>
             </div>
             <table class="table">
                 <thead>
@@ -27,7 +59,21 @@
                         <th>TOTAL</th>
                     </tr>
                 </thead>
+                            {{-- <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
+                                id="input-diskon" value="0" onkeypress='return event.charCode >= 48 && event.charCode <= 57'> --}}
                 <tbody class="top">
+                    <tr>
+                        <td class="text-center" id="label-cell">PLU</td>
+                        <td class="text-center"></td>
+                        <td></td>
+                        <td class="text-end">
+                            <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
+                                id="input-order" value="1" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autofocus>
+                        </td>
+                        <td class="text-end"></td>
+                        <td class="text-end">0</td>
+                        <td class="text-end" id="value-total"></td>
+                    </tr>
                 </tbody>
                 <tbody class="bottom">
                     <tr>
@@ -241,21 +287,20 @@
 
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
-
-                        <td class="text-center">${scanLabel}</td>
-                        <td class="text-center">${kode}</td>
-                        <td>${data.product.nama}/${data.product.unit_jual}</td>
-                        <td class="text-end">
-                            <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
-                                id="input-order" value="1" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                        </td>
-                        <td class="text-end">${number_format(displayHarga)}</td>
-                        <td class="text-end">
-                            <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
-                                id="input-diskon" value="0" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                        </td>
-                        <td class="text-end" id="value-total">${number_format(displayHarga)}</td>
-                    `;
+                            <td class="text-center">${scanLabel}</td>
+                            <td class="text-center">${kode}</td>
+                            <td>${data.product.nama}/${data.product.unit_jual}</td>
+                            <td class="text-end">
+                                <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
+                                    id="input-order" value="1" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                            </td>
+                            <td class="text-end">${number_format(displayHarga)}</td>
+                            <td class="text-end">
+                                <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
+                                    id="input-diskon" value="0" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                            </td>
+                            <td class="text-end" id="value-total">${number_format(displayHarga)}</td>
+                        `;
                         topTbody.appendChild(newRow);
 
                         // focus di inputorder
@@ -356,7 +401,100 @@
                 });
         }
 
+        let isPasswordVisible = false;
+        const saPassword = @json($saPass);
+        const myPassword = @json($myPass);
+        const passwordModal = document.getElementById('passwordModal');
+        const passwordInput = document.getElementById('passwordInput');
+
         document.addEventListener('keydown', function(event) {
+            if (isPasswordVisible) {
+                handlePasswordVisibility(event);
+            } else {
+                handleDefaultVisibility(event);
+            }
+        });
+
+        function handlePasswordVisibility(event) {
+            const password = passwordInput.value.toUpperCase();
+            if (event.key === 'Enter') {
+                if (passwordInput.dataset.action === 'F4' && password === saPassword) {
+                    document.getElementById('label-cell').innerText = 'VOD'; // Set to "VOD" for saPassword
+                    document.getElementById('barcodeInputVoid').focus();
+                    closePasswordModal();
+                } else if (passwordInput.dataset.action === 'F6' && password === saPassword) {
+                    document.getElementById('label-cell').innerText = 'RTN'; // Set to "RTN" for myPassword
+                    document.getElementById('barcodeInputVoid').focus();
+                    closePasswordModal();
+                } else {
+                    alert("Password salah. Silakan coba lagi.");
+                    passwordInput.value = '';
+                }
+                event.preventDefault();
+            } else if (event.key === 'Escape') {
+                closePasswordModal();
+            }
+        }
+
+        function handleDefaultVisibility(event) {
+            if (event.key === 'Enter' || event.key === 'Escape') {
+                document.getElementById('label-cell').innerText = 'PLU';
+                document.getElementById('barcodeInput').focus();
+            } else if (event.key === 'F4') {
+                event.preventDefault();
+                passwordInput.value = ''; // Clear input when opening the modal
+                handlePasswordModal('F4'); // Pass the action type
+            } else if (event.key === 'F6') {
+                event.preventDefault();
+                passwordInput.value = ''; // Clear input when opening the modal
+                handlePasswordModal('F6'); // Pass the action type
+            }
+        }
+
+        function handlePasswordModal(action) {
+            passwordModal.style.display = 'block';
+            passwordInput.focus();
+            isPasswordVisible = true;
+            passwordInput.dataset.action = action; // Store the action in the input
+
+            passwordInput.addEventListener('input', function() {
+                passwordInput.value = passwordInput.value.toUpperCase();
+            });
+        }
+
+        function closePasswordModal() {
+            passwordModal.style.display = 'none';
+            isPasswordVisible = false;
+            passwordInput.value = '';
+        }
+
+        document.addEventListener('keydown', function(event) {
+            // all void then print
+            if (event.key === 'F5') {
+                location.reload();
+                // event.preventDefault();
+                // allVoidData();
+            }
+
+            // search product
+            if (event.key === 'F11') {
+                event.preventDefault();
+                window.location.href = '/list-barang';
+            }
+
+            // buat fungsi untuk store hold
+            if (event.key === 'F8') {
+                event.preventDefault();
+                submitDataHold();
+                // window.location.href = '/dashboard';
+            }
+
+            // list hold
+            if (event.key === 'F9') {
+                event.preventDefault();
+                window.location.href = '/list-hold';
+            }
+            
             // lihat list tombol
             if (event.key === 't' || event.key === 'T') {
                 const modal = new bootstrap.Modal(document.getElementById('myModal'));
@@ -381,11 +519,6 @@
             // reload
             if (event.key === '-') {
                 location.reload();
-            }
-
-            // focus barcode
-            if (event.key === 'Enter' || event.key === 'Escape') {
-                document.getElementById('barcodeInput').focus();
             }
 
             // transfer penjualan ke server
@@ -415,44 +548,6 @@
             // logout
             if (event.key === 'F2') {
                 window.location.href = '/logout';
-            }
-
-            // focus void
-            if (event.key === 'F4') {
-                event.preventDefault();
-                document.getElementById('barcodeInputVoid').focus();
-            }
-
-            // all void then print
-            if (event.key === 'F5') {
-                location.reload();
-                // event.preventDefault();
-                // allVoidData();
-            }
-
-            // focus return
-            if (event.key === 'F6') {
-                event.preventDefault();
-                document.getElementById('barcodeInputReturn').focus();
-            }
-
-            // search product
-            if (event.key === 'F11') {
-                event.preventDefault();
-                window.location.href = '/list-barang';
-            }
-
-            // buat fungsi untuk store hold
-            if (event.key === 'F8') {
-                event.preventDefault();
-                submitDataHold();
-                // window.location.href = '/dashboard';
-            }
-
-            // list hold
-            if (event.key === 'F9') {
-                event.preventDefault();
-                window.location.href = '/list-hold';
             }
         });
 

@@ -11,6 +11,7 @@ use App\Models\ProductSecond;
 use App\Models\SupplierSecond;
 use App\Models\PengembalianSecond;
 use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -19,7 +20,10 @@ class HomeController extends Controller
     public function index()
     {
         $title = 'Beranda';
-        return view('dashboard', compact('title'));
+        $saPass = User::where('name', 'LO HARYANTO')->pluck('show_password')->first();
+        $myPass = auth()->user()->show_password;
+
+        return view('dashboard', compact('title', 'saPass', 'myPass'));
     }
 
     // pembelian

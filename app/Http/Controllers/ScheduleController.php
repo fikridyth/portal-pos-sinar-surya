@@ -47,24 +47,27 @@ class ScheduleController extends Controller
             }
     
             $allProducts = array_values($productOrders);
-            // dd($allProducts);
-            foreach ($allProducts as $product) {
-                if ($product['order'] > 0) {
-                    ProductStockSecond::create([
-                        'tipe' => 'POS',
-                        'tanggal' => $penjualans[0]->tanggal,
-                        'kode' => $product['kode'],
-                        'total' => -$product['order'],
-                        'unit_jual' => $product['unit_jual']
-                    ]);
-                } else {
-                    ProductStockSecond::create([
-                        'tipe' => 'POS',
-                        'tanggal' => $penjualans[0]->tanggal,
-                        'kode' => $product['kode'],
-                        'total' => abs($product['order']),
-                        'unit_jual' => $product['unit_jual']
-                    ]);
+            if ($allProducts == []) {
+                return response()->json(['success' => false, 'message' => 'Tidak ada data yang dikirim!']);
+            } else {
+                foreach ($allProducts as $product) {
+                    if ($product['order'] > 0) {
+                        ProductStockSecond::create([
+                            'tipe' => 'POS',
+                            'tanggal' => $penjualans[0]->tanggal,
+                            'kode' => $product['kode'],
+                            'total' => -$product['order'],
+                            'unit_jual' => $product['unit_jual']
+                        ]);
+                    } else {
+                        ProductStockSecond::create([
+                            'tipe' => 'POS',
+                            'tanggal' => $penjualans[0]->tanggal,
+                            'kode' => $product['kode'],
+                            'total' => abs($product['order']),
+                            'unit_jual' => $product['unit_jual']
+                        ]);
+                    }
                 }
             }
     
