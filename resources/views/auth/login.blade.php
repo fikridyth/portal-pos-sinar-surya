@@ -52,16 +52,16 @@
                             aria-labelledby="tab-login">
                             <form action="{{ route('auth.login-submit') }}" method="POST" class="form">
                                 @csrf
-                                <div data-mdb-input-init class="form-outline mb-4">
-                                    <input type="text" name="username" id="loginUsername" class="form-control"
-                                        placeholder="ENTER A VALID USERNAME" autocomplete="off" required style="text-transform: uppercase;"/>
-                                    <label class="form-label">USERNAME</label>
+                                <div class="mb-3">
+                                    <label class="form-label mb-n1">USERNAME</label>
+                                    <input type="text" name="username" id="loginUsername" class="form-control" autofocus
+                                        placeholder="ENTER USERNAME" autocomplete="off" required style="text-transform: uppercase;"/>
                                 </div>
 
-                                <div data-mdb-input-init class="form-outline mb-4">
+                                <div class="mb-3">
+                                    <label class="form-label mb-n1">PASSWORD</label>
                                     <input type="password" name="password" id="loginPassword" class="form-control"
-                                        placeholder="ENTER A VALID PASSWORD" autocomplete="off" required style="text-transform: uppercase;" />
-                                    <label class="form-label">PASSWORD</label>
+                                        placeholder="ENTER PASSWORD" autocomplete="off" required style="text-transform: uppercase;" />
                                 </div>
 
                                 <button type="submit" class="btn btn-primary btn-block mb-4">SIGN IN</button>
