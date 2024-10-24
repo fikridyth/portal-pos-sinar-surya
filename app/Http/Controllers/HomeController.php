@@ -124,7 +124,7 @@ class HomeController extends Controller
                             justify-content: space-between; 
                             margin-top: 2px; 
                             margin-bottom: 2px; 
-                            font-size: 12px; 
+                            font-size: 10px; 
                         }
                         .total { 
                             margin-top: 5px; 
@@ -201,12 +201,20 @@ class HomeController extends Controller
         return view('index-hold', compact('title', 'hold'));
     }
 
-    // product
+    // list product for cash
     public function listBarang(ProductDataTable $dataTable)
     {
         $title = 'List Barang';
 
         return $dataTable->render('list-barang', compact('title'));
+    }
+
+    // list product for supplier
+    public function listBarangSupplier(ProductDataTable $dataTable, $id)
+    {
+        $title = 'List Barang';
+
+        return $dataTable->render('list-barang-supplier', compact('title', 'id'));
     }
 
     // supplier
@@ -222,7 +230,7 @@ class HomeController extends Controller
         $title = 'Kembali Barang';
         $supplier = Supplier::find($id);
 
-        return view('index-supplier', compact('title', 'supplier'));
+        return view('index-supplier', compact('title', 'supplier', 'id'));
     }
 
     // return
@@ -287,7 +295,7 @@ class HomeController extends Controller
                             justify-content: space-between; 
                             margin-top: 2px; 
                             margin-bottom: 2px; 
-                            font-size: 12px; 
+                            font-size: 10px; 
                         }
                         .total { 
                             margin-top: 5px; 
@@ -305,14 +313,14 @@ class HomeController extends Controller
         foreach ($products as $product) {
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
-            $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+            $output .= "<span>" . number_format($product['field_total'], 0, ',', '.') . "</span>";
             $output .= "</div>";
         }
         
         $output .= "<div class='separator'></div>";
         $output .= "<div class='product-item'>";
         $output .= "<span>TOTAL</span>";
-        $output .= "<span>" . number_format($pengembalian->grand_total, 0, ',', '.') . "</span>";
+        $output .= "<span>" . number_format($pengembalian->total, 0, ',', '.') . "</span>";
         $output .= "</div>";
         $output .= "<div class='product-item'>";
         $output .= "<span class='total'>" . auth()->user()->name . "</span>";

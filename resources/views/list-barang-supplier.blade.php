@@ -43,6 +43,7 @@
     {{ $dataTable->scripts() }}
 
     <script>
+        const id = {{ $id }};
         document.addEventListener('DOMContentLoaded', function() {
             // Retrieve the productDetails from localStorage
             const oldProductDetails = localStorage.getItem('productDetails');
@@ -61,23 +62,31 @@
                     const link = event.target; // Reference to the clicked link
 
                     const newProductDetails = {
-                        label: 'PLU',
                         kode: link.getAttribute('data-kode'),
                         kode_alternatif: link.getAttribute('data-kode-alternatif'),
-                        nama: link.getAttribute('data-nama') + '/' + link.getAttribute('data-unit-jual'),
-                        harga: parseFloat(link.getAttribute('data-harga-jual')),
+                        nama: link.getAttribute('data-nama'),
+                        unit_jual: link.getAttribute('data-unit-jual'),
+                        stok: link.getAttribute('data-stok'),
                         order: 1,
-                        total: parseFloat(link.getAttribute('data-harga-jual')), // Assuming quantity is 1
-                        diskon: 0,
-                        grand_total: parseFloat(link.getAttribute('data-harga-jual'))
+                        price: parseFloat(link.getAttribute('data-harga-pokok')),
+                        field_total: parseFloat(link.getAttribute('data-harga-pokok')),
+                        kode_sumber: link.getAttribute('data-kode-sumber'),
+                        diskon1: 0,
+                        diskon2: 0,
+                        diskon3: 0,
+                        penjualan_rata: 0,
+                        waktu_kunjungan: 0,
+                        stok_minimum: 0,
+                        stok_maksimum: 0,
+                        is_ppn: 0,
                     };
                     productDetails.push(newProductDetails);
-                    grandTotal += Number(link.getAttribute('data-harga-jual'));
+                    grandTotal += Number(link.getAttribute('data-harga-pokok'));
 
                     // Store product details in localStorage
                     localStorage.setItem('productDetails', JSON.stringify(productDetails));
                     localStorage.setItem('grandTotal', grandTotal);
-                    window.location.href = '/';
+                    window.location.href = `/index-supplier/${id}`;
                 }
             });
         });
@@ -85,7 +94,7 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F11') {
                 event.preventDefault();
-                window.location.href = '/dashboard';
+                window.location.href = `/index-supplier/${id}`;
             }
 
             if (event.key === 'Tab') {

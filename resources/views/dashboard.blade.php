@@ -108,24 +108,10 @@
     <script>
     // implementasi barcode
         const barcodeValues = [];
-        // let productDetails = [];
+        let productDetails = [];
         let inputTimeout;
         let grandTotal = 0;
         let grandDiskon = 0;
-
-        let productDetails = [
-            {
-                label: "PLU",
-                kode: "00055378",
-                kode_alternatif: "8993478101053",
-                nama: "ACTIFED RED/P2",
-                harga: 63000,
-                order: 1,
-                total: 63000,
-                diskon: 0,
-                grand_total: 63000
-            }
-        ];
 
         document.getElementById('barcodeInput').addEventListener('input', function(event) {
             const barcodeValueInit = event.target.value;
@@ -302,11 +288,12 @@
         }
     // add otoritas, implementasi void, return
 
-    // get this detail product for manual search
+    // get this detail product from manual search
         const storedProductDetails = localStorage.getItem('productDetails');
         if (storedProductDetails) {
             // Parse the JSON string into an object
             productDetails = JSON.parse(storedProductDetails);
+            grandTotal = Number(localStorage.getItem('grandTotal'));
 
             // make table
             const topTbody = document.querySelector('tbody.top');
@@ -324,9 +311,16 @@
                 `;
                 topTbody.insertBefore(newRow, staticRow);
             });
+
+            // update table
+            document.getElementById("big-total").innerHTML = number_format(grandTotal - grandDiskon);
+            document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
+            document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
+            document.getElementById("small-total").innerHTML = number_format(grandTotal - grandDiskon);
         }
-        console.log(productDetails)
-    // get this detail product for manual search
+        // console.log(productDetails)
+        // console.log(grandTotal)
+    // get this detail product from manual search
 
     // implementasi klik yang tidak menggunakan otoritas
         document.addEventListener('keydown', function(event) {
@@ -347,6 +341,7 @@
             if (event.key === 'F11') {
                 event.preventDefault();
                 localStorage.setItem('productDetails', JSON.stringify(productDetails));
+                localStorage.setItem('grandTotal', grandTotal);
                 window.location.href = '/list-barang';
             }
 
@@ -377,8 +372,10 @@
             
             // all void then print
             if (event.key === 'F5') {
+                event.preventDefault();
                 window.addEventListener('beforeunload', function() {
                     localStorage.removeItem('productDetails');
+                    localStorage.removeItem('grandTotal');
                 });
                 location.reload();
             }
@@ -392,23 +389,39 @@
             // list hold
             if (event.key === 'F9') {
                 event.preventDefault();
+                window.addEventListener('beforeunload', function() {
+                    localStorage.removeItem('productDetails');
+                    localStorage.removeItem('grandTotal');
+                });
                 window.location.href = '/list-hold';
             }
 
             if (event.key === 'r' || event.key === 'R') {
                 event.preventDefault();
+                window.addEventListener('beforeunload', function() {
+                    localStorage.removeItem('productDetails');
+                    localStorage.removeItem('grandTotal');
+                });
                 window.location.href = '/list-pembelian';
             }
 
             // kembali barang supplier
             if (event.key === 'y' || event.key === 'Y') {
                 event.preventDefault();
+                window.addEventListener('beforeunload', function() {
+                    localStorage.removeItem('productDetails');
+                    localStorage.removeItem('grandTotal');
+                });
                 window.location.href = '/list-supplier';
             }
 
             // kembali ke pembayaran
             if (event.key === '>' || event.key === '.') {
                 event.preventDefault();
+                window.addEventListener('beforeunload', function() {
+                    localStorage.removeItem('productDetails');
+                    localStorage.removeItem('grandTotal');
+                });
                 window.location.href = '/dashboard';
             }
 
@@ -416,6 +429,7 @@
             if (event.key === '-') {
                 window.addEventListener('beforeunload', function() {
                     localStorage.removeItem('productDetails');
+                    localStorage.removeItem('grandTotal');
                 });
                 location.reload();
             }
@@ -423,6 +437,10 @@
             // logout
             if (event.key === 'F2') {
                 event.preventDefault();
+                window.addEventListener('beforeunload', function() {
+                    localStorage.removeItem('productDetails');
+                    localStorage.removeItem('grandTotal');
+                });
                 window.location.href = '/logout';
             }
         });
@@ -477,6 +495,7 @@
                         // Clear localStorage on page unload
                         window.addEventListener('beforeunload', function() {
                             localStorage.removeItem('productDetails');
+                            localStorage.removeItem('grandTotal');
                         });
                     }
                 })
@@ -487,36 +506,36 @@
     // store data ke tabel penjualan
 
     // cetak data
-    function printReceipt(printData) {
-        // Membuka jendela baru untuk pencetakan
-        const printWindow = window.open('', '', 'height=400,width=300');
-        
-        // Menyusun isi struk dalam format HTML
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Struk Pembayaran</title>
-                    <style>
-                        body {
-                            font-family: monospace;
-                            font-size: 12px;
-                            margin: 0;
-                            padding: 10px;
-                        }
-                        pre {
-                            white-space: pre-wrap; /* Mengatur spasi */
-                        }
-                    </style>
-                </head>
-                <body>
-                    <pre>${printData}</pre>
-                </body>
-            </html>
-        `);
-        
-        printWindow.document.close();
-        printWindow.print();
-    }
+        function printReceipt(printData) {
+            // Membuka jendela baru untuk pencetakan
+            const printWindow = window.open('', '', 'height=400,width=300');
+            
+            // Menyusun isi struk dalam format HTML
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Struk Pembayaran</title>
+                        <style>
+                            body {
+                                font-family: monospace;
+                                font-size: 12px;
+                                margin: 0;
+                                padding: 10px;
+                            }
+                            pre {
+                                white-space: pre-wrap; /* Mengatur spasi */
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <pre>${printData}</pre>
+                    </body>
+                </html>
+            `);
+            
+            printWindow.document.close();
+            printWindow.print();
+        }
     // cetak data
 
     // progress - store data hold
@@ -546,6 +565,10 @@
                         alert(data.error);
                     } else {
                         alert(data.success);
+                        window.addEventListener('beforeunload', function() {
+                            localStorage.removeItem('productDetails');
+                            localStorage.removeItem('grandTotal');
+                        });
                         location.reload();
                     }
                 })

@@ -29,11 +29,17 @@ class ProductDataTable extends DataTable
         ->editColumn('nama', function ($row) {
             return '<a href="#" 
             data-kode="' . $row->kode . '" 
+            data-kode-sumber="' . $row->kode_sumber . '" 
             data-kode-alternatif="' . $row->kode_alternatif . '" 
             data-nama="' . $row->nama . '" 
             data-unit-jual="' . $row->unit_jual . '" 
             data-harga-jual="' . $row->harga_jual . '" 
+            data-stok="' . $row->stok . '" 
+            data-harga-pokok="' . $row->harga_pokok . '" 
             class="product-link">' . $row->nama . '/' . $row->unit_jual . '</a>';
+        })
+        ->editColumn('harga_pokok', function ($row) {
+            return number_format($row->harga_pokok);
         })
         ->editColumn('harga_jual', function ($row) {
             return number_format($row->harga_jual);
@@ -80,7 +86,8 @@ class ProductDataTable extends DataTable
         return [
             Column::make('kode_alternatif')->title('KODE')->addClass('text-center text-black'),
             Column::make('nama')->title('NAMA BARANG')->addClass('text-black'),
-            Column::make('harga_jual')->title('HARGA')->addClass('text-end text-black'),
+            Column::make('harga_pokok')->title('HARGA BELI')->addClass('text-end text-black'),
+            Column::make('harga_jual')->title('HARGA JUAL')->addClass('text-end text-black'),
         ];
     }
 

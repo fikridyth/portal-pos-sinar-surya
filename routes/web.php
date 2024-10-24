@@ -57,7 +57,8 @@ Route::middleware('auth')->group(function () {
 
     // list barang
     Route::get('/list-barang', [HomeController::class, 'listBarang'])->name('list-barang');
-    
+    Route::get('/list-barang-supplier/{id}', [HomeController::class, 'listBarangSupplier'])->name('list-barang-supplier');
+
     // list hold
     Route::post('/penjualan/hold', [HomeController::class, 'holdPenjualan'])->name('penjualan.hold');
     Route::get('/list-hold', [HomeController::class, 'listHold'])->name('list-hold');
