@@ -67,7 +67,8 @@
                         <td class="text-center" style="width: 200px;"></td>
                         <td></td>
                         <td class="text-end" style="width: 100px;">
-                            <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
+                            <p id="input-text">1</p>
+                            <input type="text" hidden style="background-color: black; color: white; text-align: right; border: 1px solid white;" autocomplete="off"
                                 id="input-order" value="1" size="7" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                         </td>
                         <td class="text-end" style="width: 175px;">0</td>
@@ -112,6 +113,7 @@
         let inputTimeout;
         let grandTotal = 0;
         let grandDiskon = 0;
+        const inputOrder = document.getElementById('input-order');
 
         document.getElementById('barcodeInput').addEventListener('input', function(event) {
             const barcodeValueInit = event.target.value;
@@ -167,18 +169,18 @@
                         alert (data.error)
                     } else {
                         const hargaJual = data.product.harga_jual;
-                        const inputOrder = document.getElementById('input-order').value;
                         const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
+                        const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder : inputOrder;
 
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
                             <td class="text-center" style="width: 75px;">${scanLabel}</td>
                             <td class="text-center" style="width: 200px;">${kode}</td>
                             <td>${data.product.nama}/${data.product.unit_jual}</td>
-                            <td class="text-end" style="width: 100px;">${inputOrder}</td>
+                            <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
                             <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
                             <td class="text-end" style="width: 175px;">0</td>
-                            <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder)}</td>
+                            <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
                         `;
                         const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
                         if (lastInsertedRow) {
@@ -201,8 +203,8 @@
                             kode_alternatif: data.product.kode_alternatif,
                             nama: data.product.nama + '/' + data.product.unit_jual,
                             harga: displayHarga,
-                            order: inputOrder,
-                            total: inputOrder * displayHarga,
+                            order: displayOrder,
+                            total: inputOrder.value * displayHarga,
                             diskon: 0,
                             grand_total: displayHarga - 0
                         });
@@ -255,9 +257,13 @@
         function handleDefaultVisibility(event) {
             if (event.key === 'Enter' || event.key === 'Escape') {
                 document.getElementById('label-cell').innerText = 'PLU';
+                document.getElementById('input-text').innerHTML = document.getElementById('input-order').value;
                 if (document.getElementById('input-order').value === '' || document.getElementById('input-order').value == 0) {
                     document.getElementById('input-order').value = 1;
+                    document.getElementById('input-text').innerHTML = 1;
                 }
+                document.getElementById('input-text').hidden = false;
+                document.getElementById('input-order').hidden = true;
                 document.getElementById('barcodeInput').focus();
             } else if (event.key === 'F4') {
                 event.preventDefault();
@@ -327,6 +333,8 @@
             // focus on input qty
             if (event.key === 'Tab') {
                 event.preventDefault();
+                document.getElementById('input-text').hidden = true;
+                document.getElementById('input-order').hidden = false;
                 document.getElementById('input-order').value = '';
                 document.getElementById('input-order').focus();
             }
@@ -342,6 +350,8 @@
                 event.preventDefault();
                 localStorage.setItem('productDetails', JSON.stringify(productDetails));
                 localStorage.setItem('grandTotal', grandTotal);
+                localStorage.setItem('inputOrder', inputOrder.value);
+                localStorage.setItem('scanLabel', document.getElementById('label-cell').innerText);
                 window.location.href = '/list-barang';
             }
 

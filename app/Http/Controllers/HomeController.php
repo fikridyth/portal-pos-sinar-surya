@@ -324,7 +324,7 @@ class HomeController extends Controller
         $output .= "</div>";
         $output .= "<div class='product-item'>";
         $output .= "<span class='total'>" . auth()->user()->name . "</span>";
-        $output .= "<span class='total'>( NO#:{$pengembalian->no} )</span>";
+        $output .= "<span class='total'>( NO#:{$pengembalian->nomor_return} )</span>";
         $output .= "<span class='total'>QTY: " . count($products) . "</span>";
         $output .= "</div>";
         $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>

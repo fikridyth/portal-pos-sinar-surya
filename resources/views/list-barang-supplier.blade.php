@@ -49,8 +49,7 @@
             const oldProductDetails = localStorage.getItem('productDetails');
             let productDetails = JSON.parse(oldProductDetails);
             let grandTotal = Number(localStorage.getItem('grandTotal')) || 0;
-            // console.log(productDetails)
-            // console.log(grandTotal)
+            let inputOrder = Number(localStorage.getItem('inputOrder'));
 
             // Get data from table
             const productTable = document.querySelector('#product-table');
@@ -67,9 +66,9 @@
                         nama: link.getAttribute('data-nama'),
                         unit_jual: link.getAttribute('data-unit-jual'),
                         stok: link.getAttribute('data-stok'),
-                        order: 1,
+                        order: inputOrder,
                         price: parseFloat(link.getAttribute('data-harga-pokok')),
-                        field_total: parseFloat(link.getAttribute('data-harga-pokok')),
+                        field_total: parseFloat(link.getAttribute('data-harga-pokok') * inputOrder),
                         kode_sumber: link.getAttribute('data-kode-sumber'),
                         diskon1: 0,
                         diskon2: 0,
@@ -81,11 +80,12 @@
                         is_ppn: 0,
                     };
                     productDetails.push(newProductDetails);
-                    grandTotal += Number(link.getAttribute('data-harga-pokok'));
+                    grandTotal += Number(link.getAttribute('data-harga-pokok') * inputOrder);
 
                     // Store product details in localStorage
                     localStorage.setItem('productDetails', JSON.stringify(productDetails));
                     localStorage.setItem('grandTotal', grandTotal);
+                    localStorage.removeItem('inputOrder', inputOrder);
                     window.location.href = `/index-supplier/${id}`;
                 }
             });

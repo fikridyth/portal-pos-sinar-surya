@@ -48,8 +48,8 @@
             const oldProductDetails = localStorage.getItem('productDetails');
             let productDetails = JSON.parse(oldProductDetails);
             let grandTotal = Number(localStorage.getItem('grandTotal')) || 0;
-            // console.log(productDetails)
-            // console.log(grandTotal)
+            let inputOrder = Number(localStorage.getItem('inputOrder'));
+            let scanLabel = localStorage.getItem('scanLabel');
 
             // Get data from table
             const productTable = document.querySelector('#product-table');
@@ -57,26 +57,30 @@
                 // Check if the clicked element is a product link
                 if (event.target.classList.contains('product-link')) {
                     event.preventDefault(); // Prevent default link behavior
-
                     const link = event.target; // Reference to the clicked link
+                    const hargaJual = parseFloat(link.getAttribute('data-harga-jual'));
+                    const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
+                    const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder : inputOrder;
 
                     const newProductDetails = {
-                        label: 'PLU',
+                        label: scanLabel,
                         kode: link.getAttribute('data-kode'),
                         kode_alternatif: link.getAttribute('data-kode-alternatif'),
                         nama: link.getAttribute('data-nama') + '/' + link.getAttribute('data-unit-jual'),
-                        harga: parseFloat(link.getAttribute('data-harga-jual')),
-                        order: 1,
-                        total: parseFloat(link.getAttribute('data-harga-jual')), // Assuming quantity is 1
+                        harga: displayHarga,
+                        order: displayOrder,
+                        total: displayHarga * inputOrder,
                         diskon: 0,
-                        grand_total: parseFloat(link.getAttribute('data-harga-jual'))
+                        grand_total: displayHarga * inputOrder
                     };
                     productDetails.push(newProductDetails);
-                    grandTotal += Number(link.getAttribute('data-harga-jual'));
+                    grandTotal += Number(displayHarga * inputOrder);
 
                     // Store product details in localStorage
                     localStorage.setItem('productDetails', JSON.stringify(productDetails));
                     localStorage.setItem('grandTotal', grandTotal);
+                    localStorage.removeItem('inputOrder');
+                    localStorage.removeItem('scanLabel');
                     window.location.href = '/';
                 }
             });

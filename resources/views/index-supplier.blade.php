@@ -65,7 +65,7 @@
                         <td class="text-center" style="width: 200px;"></td>
                         <td></td>
                         <td class="text-end" style="width: 100px;">
-                            <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
+                            <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;" autocomplete="off"
                                 id="input-order" value="1" size="7" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                         </td>
                         <td class="text-end" style="width: 175px;">0</td>
@@ -110,6 +110,7 @@
         let inputTimeout;
         let grandTotal = 0;
         let grandDiskon = 0;
+        const inputOrder = document.getElementById('input-order');
 
         document.getElementById('barcodeInput').addEventListener('input', function(event) {
             const barcodeValueInit = event.target.value;
@@ -165,7 +166,6 @@
                         alert (data.error)
                     } else {
                         const hargaJual = data.product.harga_jual;
-                        const inputOrder = document.getElementById('input-order').value;
                         const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
 
                         const newRow = document.createElement('tr');
@@ -173,10 +173,10 @@
                             <td class="text-center" style="width: 75px;">${scanLabel}</td>
                             <td class="text-center" style="width: 200px;">${kode}</td>
                             <td>${data.product.nama}/${data.product.unit_jual}</td>
-                            <td class="text-end" style="width: 100px;">${inputOrder}</td>
+                            <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
                             <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
                             <td class="text-end" style="width: 175px;">0</td>
-                            <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder)}</td>
+                            <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
                         `;
                         const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
                         if (lastInsertedRow) {
@@ -199,9 +199,9 @@
                             nama: data.product.nama,
                             unit_jual: data.product.unit_jual,
                             stok: data.product.stok,
-                            order: inputOrder,
+                            order: inputOrder.value,
                             price: data.product.harga_pokok,
-                            field_total: inputOrder * data.product.harga_pokok,
+                            field_total: inputOrder.value * data.product.harga_pokok,
                             kode_sumber: data.product.kode_sumber,
                             diskon1: 0,
                             diskon2: 0,
@@ -241,7 +241,7 @@
                     <td class="text-end" style="width: 100px;">${data.order}</td>
                     <td class="text-end" style="width: 175px;">${number_format(data.price)}</td>
                     <td class="text-end" style="width: 175px;">0</td>
-                    <td class="text-end" style="width: 175px;" id="value-total">${number_format(data.price)}</td>
+                    <td class="text-end" style="width: 175px;" id="value-total">${number_format(data.field_total)}</td>
                 `;
                 topTbody.insertBefore(newRow, staticRow);
             });
@@ -265,6 +265,15 @@
                 document.getElementById('input-order').focus();
             }
 
+            // handle enter
+            if (event.key === 'Enter' || event.key === 'Escape') {
+                document.getElementById('label-cell').innerText = 'PLU';
+                if (document.getElementById('input-order').value === '' || document.getElementById('input-order').value == 0) {
+                    document.getElementById('input-order').value = 1;
+                }
+                document.getElementById('barcodeInput').focus();
+            }
+
             // lihat list tombol
             if (event.key === 't' || event.key === 'T') {
                 const modal = new bootstrap.Modal(document.getElementById('myModal'));
@@ -276,6 +285,7 @@
                 event.preventDefault();
                 localStorage.setItem('productDetails', JSON.stringify(productDetails));
                 localStorage.setItem('grandTotal', grandTotal);
+                localStorage.setItem('inputOrder', inputOrder.value);
                 const id = {{ $id }};
                 window.location.href = `/list-barang-supplier/${id}`;
             }
