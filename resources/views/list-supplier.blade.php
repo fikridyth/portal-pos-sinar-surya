@@ -48,6 +48,16 @@
                 event.preventDefault();
                 window.location.href = '/dashboard';
             }
+
+            if (event.key === 'Tab') {
+                event.preventDefault(); // Prevent default tab behavior
+
+                // Focus on the DataTable search input
+                const searchInput = document.querySelector('#supplier-table_filter input');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }
         });
     </script>
 @endsection

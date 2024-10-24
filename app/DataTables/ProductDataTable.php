@@ -21,13 +21,19 @@ class ProductDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        return (new EloquentDataTable($query->orderBy('created_at', 'desc')))
+        return (new EloquentDataTable($query->whereNotNull('kode_alternatif')->where('kode_alternatif', '!=', '')->orderBy('created_at', 'desc')))
         ->addIndexColumn()
         ->editColumn('created_at', function ($row) {
             return $row->created_at->setTimezone('Asia/Jakarta')->format('d F Y, H:i:s');
         })
         ->editColumn('nama', function ($row) {
-            return $row->nama . '/' . $row->unit_jual;
+            return '<a href="#" 
+            data-kode="' . $row->kode . '" 
+            data-kode-alternatif="' . $row->kode_alternatif . '" 
+            data-nama="' . $row->nama . '" 
+            data-unit-jual="' . $row->unit_jual . '" 
+            data-harga-jual="' . $row->harga_jual . '" 
+            class="product-link">' . $row->nama . '/' . $row->unit_jual . '</a>';
         })
         ->editColumn('harga_jual', function ($row) {
             return number_format($row->harga_jual);
@@ -72,16 +78,9 @@ class ProductDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            // Column::make('DT_RowIndex')->title('No.')->searchable(false)->orderable(false)->addClass('text-center'),
-            Column::make('kode')->title('KODE')->addClass('text-center text-black'),
+            Column::make('kode_alternatif')->title('KODE')->addClass('text-center text-black'),
             Column::make('nama')->title('NAMA BARANG')->addClass('text-black'),
             Column::make('harga_jual')->title('HARGA')->addClass('text-end text-black'),
-            // Column::make('created_at')->title('Tanggal Dibuat')->addClass('text-center'),
-            // Column::computed('action')
-            //     ->exportable(false)
-            //     ->printable(false)
-            //     ->width(60)
-            //     ->addClass('text-center'),
         ];
     }
 

@@ -86,7 +86,6 @@ class HomeController extends Controller
             return response()->json(['error' => 'No data scanned!']);
         }
 
-
         $printData = $this->formatPrintData($penjualan, $products);
         
         return response()->json(['penjualan' => $penjualan, 'printData' => $printData]);
@@ -107,17 +106,39 @@ class HomeController extends Controller
             <html>
                 <head>
                     <style>
-                        body { font-family: Arial, sans-serif; }
-                        .header { text-align: center; margin-bottom: 20px; }
-                        .products { margin-top: 5px; }
-                        .product-item { display: flex; justify-content: space-between; margin-top: 5px; margin-bottom: 5px; }
-                        .total { margin-top: 5px; }
-                        .separator { margin-top: 5px; border-top: 1px dashed black; }
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            width: 58mm; 
+                            margin: 0 auto; 
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 10px; 
+                            font-size: 12px; 
+                        }
+                        .products { 
+                            margin-top: 5px; 
+                        }
+                        .product-item { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 12px; 
+                        }
+                        .total { 
+                            margin-top: 5px; 
+                            font-weight: bold; 
+                        }
+                        .separator { 
+                            margin-top: 5px; 
+                            border-top: 1px dashed black; 
+                        }
                     </style>
                 </head>
                 <body>
                     <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
-
+    
         foreach ($products as $product) {
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
@@ -134,11 +155,12 @@ class HomeController extends Controller
         $output .= "<span class='total'>" . auth()->user()->name . "</span>";
         $output .= "<span class='total'>( NO#:{$penjualan->no} )</span>";
         $output .= "<span class='total'>QTY: " . count($products) . "</span>";
-        $output .= "</div><div class='header total' style='margin-top: 20px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
+        $output .= "</div>";
+        $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
                 </body>
             </html>";
         return $output;
-    }
+    }    
 
     // hold
     public function holdPenjualan(Request $request)
@@ -247,34 +269,57 @@ class HomeController extends Controller
             <html>
                 <head>
                     <style>
-                        body { font-family: Arial, sans-serif; }
-                        .header { text-align: center; margin-bottom: 20px; }
-                        .products { margin-top: 5px; }
-                        .product-item { display: flex; justify-content: space-between; margin-top: 5px; margin-bottom: 5px; }
-                        .total { margin-top: 5px; }
-                        .separator { margin-top: 5px; border-top: 1px dashed black; }
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            width: 58mm; 
+                            margin: 0 auto; 
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 10px; 
+                            font-size: 12px; 
+                        }
+                        .products { 
+                            margin-top: 5px; 
+                        }
+                        .product-item { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 12px; 
+                        }
+                        .total { 
+                            margin-top: 5px; 
+                            font-weight: bold; 
+                        }
+                        .separator { 
+                            margin-top: 5px; 
+                            border-top: 1px dashed black; 
+                        }
                     </style>
                 </head>
                 <body>
                     <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
-
+    
         foreach ($products as $product) {
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
-            $output .= "<span>" . number_format($product['field_total'], 0, ',', '.') . "</span>";
+            $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
             $output .= "</div>";
         }
         
         $output .= "<div class='separator'></div>";
         $output .= "<div class='product-item'>";
         $output .= "<span>TOTAL</span>";
-        $output .= "<span>" . number_format($pengembalian->total, 0, ',', '.') . "</span>";
+        $output .= "<span>" . number_format($pengembalian->grand_total, 0, ',', '.') . "</span>";
         $output .= "</div>";
         $output .= "<div class='product-item'>";
         $output .= "<span class='total'>" . auth()->user()->name . "</span>";
-        $output .= "<span class='total'>( NO#:{$pengembalian->nomor_return} )</span>";
+        $output .= "<span class='total'>( NO#:{$pengembalian->no} )</span>";
         $output .= "<span class='total'>QTY: " . count($products) . "</span>";
-        $output .= "</div><div class='header total' style='margin-top: 20px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
+        $output .= "</div>";
+        $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
                 </body>
             </html>";
         return $output;

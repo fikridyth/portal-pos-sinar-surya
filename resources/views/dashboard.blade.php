@@ -28,7 +28,7 @@
 @section('content')
     <div class="d-flex justify-content-center">
         <div style="width: 90%;">
-            <div class="d-flex justify-content-between align-items-center mt-2 mb-2"
+            <div class="d-flex justify-content-between align-items-center mt-4 mb-2"
                 style="color: white; border: 2px solid white">
                 <p style="margin-left: 8%;"></p>
                 <h4>SINAR SURYA</h4>
@@ -36,7 +36,7 @@
             </div>
             <div class="d-flex justify-content-between">
                 <h1 id="big-name" style="color: white;"></h1>
-                <input type="text" id="barcodeInput" style="width: 1px; opacity: 0;">
+                <input type="text" id="barcodeInput" style="width: 1px; opacity: 0;" autofocus>
                 <input type="text" id="barcodeInputVoid" style="width: 1px; opacity: 0;">
                 <input type="text" id="barcodeInputReturn" style="width: 1px; opacity: 0;">
 
@@ -50,29 +50,29 @@
             <table class="table">
                 <thead>
                     <tr class="text-center">
-                        <th></th>
-                        <th>KODE</th>
+                        <th style="width: 75px;"></th>
+                        <th style="width: 200px;">KODE</th>
                         <th>NAMA BARANG</th>
-                        <th>JUMLAH</th>
-                        <th>HARGA</th>
-                        <th>DISKON</th>
-                        <th>TOTAL</th>
+                        <th style="width: 100px;">JUMLAH</th>
+                        <th style="width: 175px;">HARGA</th>
+                        <th style="width: 175px;">DISKON</th>
+                        <th style="width: 175px;">TOTAL</th>
                     </tr>
                 </thead>
-                            {{-- <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
-                                id="input-diskon" value="0" onkeypress='return event.charCode >= 48 && event.charCode <= 57'> --}}
+                    {{-- <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
+                        id="input-diskon" value="0" onkeypress='return event.charCode >= 48 && event.charCode <= 57'> --}}
                 <tbody class="top">
                     <tr>
-                        <td class="text-center" id="label-cell">PLU</td>
-                        <td class="text-center"></td>
+                        <td class="text-center" id="label-cell" style="width: 75px;">PLU</td>
+                        <td class="text-center" style="width: 200px;"></td>
                         <td></td>
-                        <td class="text-end">
+                        <td class="text-end" style="width: 100px;">
                             <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
-                                id="input-order" value="1" onkeypress='return event.charCode >= 48 && event.charCode <= 57' autofocus>
+                                id="input-order" value="1" size="7" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                         </td>
-                        <td class="text-end"></td>
-                        <td class="text-end">0</td>
-                        <td class="text-end" id="value-total"></td>
+                        <td class="text-end" style="width: 175px;">0</td>
+                        <td class="text-end" style="width: 175px;">0</td>
+                        <td class="text-end" id="value-total" style="width: 175px;">0</td>
                     </tr>
                 </tbody>
                 <tbody class="bottom">
@@ -101,130 +101,31 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal" id="myModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                {{-- <div class="modal-header">
-                    <h5 class="modal-title" id="modalLabel">Modal Title</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div> --}}
-                <div class="modal-body">
-                    <div class="d-flex justify-content-center mt-4">
-                        <div style="overflow-x: auto; height: 565px; border: 1px solid #ccc;">
-                            <table class="table" style="width: 100%; table-layout: auto;">
-                                <thead>
-                                    <tr style="border: 1px solid black; font-size: 12px;">
-                                        <th class="text-center" style="font-size: 20px;">TOMBOL</th>
-                                        <th class="text-center" style="font-size: 20px;">KETERANGAN</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="align-items-center">
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>></b></td>
-                                        <td style="font-size: 24px;">CASH</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>F11</b></td>
-                                        <td style="font-size: 24px;">SEARCH</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>F4</b></td>
-                                        <td style="font-size: 24px;">VOID</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>F5</b></td>
-                                        <td style="font-size: 24px;">ALL VOID</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>F6</b></td>
-                                        <td style="font-size: 24px;">RETURN</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>F8</b></td>
-                                        <td style="font-size: 24px;">HOLD</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>F9</b></td>
-                                        <td style="font-size: 24px;">LIST HOLD</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>?</b></td>
-                                        <td style="font-size: 24px;">SUBTOTAL</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>-</b></td>
-                                        <td style="font-size: 24px;">CLEAR</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>R</b></td>
-                                        <td style="font-size: 24px;">LIST PEMBELIAN</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>V</b></td>
-                                        <td style="font-size: 24px;">TRANSFER KE SERVER</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>Y</b></td>
-                                        <td style="font-size: 24px;">KEMBALI BARANG SUPPLIER</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-center" style="font-size: 24px;"><b>F2</b></td>
-                                        <td style="font-size: 24px;">SIGN OFF</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-center mt-4">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ESC - SELESAI</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('modal')
 @endsection
 
 @section('scripts')
     <script>
+    // implementasi barcode
         const barcodeValues = [];
-        let productDetails = [];
+        // let productDetails = [];
         let inputTimeout;
+        let grandTotal = 0;
+        let grandDiskon = 0;
+
+        let productDetails = [
+            {
+                label: "PLU",
+                kode: "00055378",
+                kode_alternatif: "8993478101053",
+                nama: "ACTIFED RED/P2",
+                harga: 63000,
+                order: 1,
+                total: 63000,
+                diskon: 0,
+                grand_total: 63000
+            }
+        ];
 
         document.getElementById('barcodeInput').addEventListener('input', function(event) {
             const barcodeValueInit = event.target.value;
@@ -268,12 +169,9 @@
             }
         });
 
-        // Fungsi untuk menambahkan barcode ke tabel
-        let grandTotal = 0;
-        let grandDiskon = 0;
-
         function scanBarcode(barcodeValue) {
             const topTbody = document.querySelector('tbody.top');
+            const staticRow = topTbody.querySelector('tr:first-child');
             const kode = barcodeValues.join('');
 
             fetch(`/get-detail-products/${kode}`)
@@ -283,124 +181,56 @@
                         alert (data.error)
                     } else {
                         const hargaJual = data.product.harga_jual;
+                        const inputOrder = document.getElementById('input-order').value;
                         const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
 
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
-                            <td class="text-center">${scanLabel}</td>
-                            <td class="text-center">${kode}</td>
+                            <td class="text-center" style="width: 75px;">${scanLabel}</td>
+                            <td class="text-center" style="width: 200px;">${kode}</td>
                             <td>${data.product.nama}/${data.product.unit_jual}</td>
-                            <td class="text-end">
-                                <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
-                                    id="input-order" value="1" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                            </td>
-                            <td class="text-end">${number_format(displayHarga)}</td>
-                            <td class="text-end">
-                                <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
-                                    id="input-diskon" value="0" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                            </td>
-                            <td class="text-end" id="value-total">${number_format(displayHarga)}</td>
+                            <td class="text-end" style="width: 100px;">${inputOrder}</td>
+                            <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
+                            <td class="text-end" style="width: 175px;">0</td>
+                            <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder)}</td>
                         `;
-                        topTbody.appendChild(newRow);
-
-                        // focus di inputorder
-                        const inputOrder = newRow.querySelector('#input-order');
-                        const inputDiskon = newRow.querySelector('#input-diskon');
-                        inputOrder.focus();
-
-                        // mencegah klik diluar menghilangkan autofocus
-                        document.addEventListener('click', function(event) {
-                            if (!inputOrder.contains(event.target)) {
-                                event.preventDefault(); // Prevent the default action
-                                inputOrder.focus(); // Keep the focus on the input
-                            }
-                        });
-
-                        // update the total
-                        let totalHarga = 1 * displayHarga;
-                        inputOrder.addEventListener('input', function() {
-                            const newValue = parseInt(this.value, 10);
-                            if (!isNaN(newValue)) {
-                                const updatedPrice = newValue * displayHarga;
-                                newRow.querySelector('#value-total').innerText = number_format(updatedPrice);
-                                totalHarga = updatedPrice;
-                            }
-                        });
-
-                        // update the diskon
-                        let totalHargaDiskon = totalHarga;
-                        let totalDiskon = 0;
-                        inputDiskon.addEventListener('input', function() {
-                            const newValue = parseInt(this.value, 10);
-                            if (!isNaN(newValue)) {
-                                const updatedPriceDiskon = totalHarga - newValue;
-                                newRow.querySelector('#value-total').innerText = number_format(updatedPriceDiskon);
-                                totalHargaDiskon = updatedPriceDiskon;
-                                totalDiskon = newValue;
-                            }
-                        });
-
-                        // fokus ke barcodeinput saat enter
-                        function handleEnterKey(event) {
-                            if (event.key === 'Enter') {
-                                // change input to text
-                                const value = this.value;
-                                const textNode = document.createElement('span');
-                                textNode.style.color = 'white'; // Adjust as needed
-                                textNode.style.backgroundColor = 'black'; // Adjust as needed
-                                textNode.style.textAlign = 'right';
-                                textNode.innerText = number_format(value);
-
-                                this.parentNode.replaceChild(textNode, this);
-
-                                // change input to text to other
-                                const otherInput = this.id === 'input-order' ? newRow.querySelector('#input-diskon') :
-                                    newRow.querySelector('#input-order');
-                                if (otherInput) {
-                                    const otherValue = otherInput.value;
-                                    const otherTextNode = document.createElement('span');
-                                    otherTextNode.style.color = 'white'; // Adjust as needed
-                                    otherTextNode.style.backgroundColor = 'black'; // Adjust as needed
-                                    otherTextNode.style.textAlign = 'right';
-                                    otherTextNode.innerText = number_format(otherValue);
-
-                                    otherInput.parentNode.replaceChild(otherTextNode, otherInput);
-                                }
-
-                                // update total harga
-                                grandTotal += totalHarga;
-                                grandDiskon += totalDiskon;
-                                document.getElementById("big-total").innerHTML = number_format(grandTotal - grandDiskon);
-                                document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
-                                document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
-                                document.getElementById("small-total").innerHTML = number_format(grandTotal - grandDiskon);
-
-                                productDetails.push({
-                                    label: scanLabel,
-                                    kode: data.product.kode,
-                                    kode_alternatif: data.product.kode_alternatif,
-                                    nama: data.product.nama + '/' + data.product.unit_jual,
-                                    harga: displayHarga,
-                                    order: totalHarga / data.product.harga_jual,
-                                    total: totalHarga,
-                                    diskon: totalDiskon,
-                                    grand_total: totalHarga - totalDiskon
-                                });
-
-                                // kembalikan focus ke barcode
-                                document.getElementById('barcodeInput').focus();
-                            }
+                        const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+                        if (lastInsertedRow) {
+                            topTbody.insertBefore(newRow, lastInsertedRow);
+                        } else {
+                            topTbody.insertBefore(newRow, staticRow);
                         }
 
+                        // update total harga
+                        grandTotal += displayHarga;
+                        grandDiskon += 0;
+                        document.getElementById("big-total").innerHTML = number_format(grandTotal - grandDiskon);
+                        document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
+                        document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
+                        document.getElementById("small-total").innerHTML = number_format(grandTotal - grandDiskon);
+
+                        productDetails.push({
+                            label: scanLabel,
+                            kode: data.product.kode,
+                            kode_alternatif: data.product.kode_alternatif,
+                            nama: data.product.nama + '/' + data.product.unit_jual,
+                            harga: displayHarga,
+                            order: inputOrder,
+                            total: inputOrder * displayHarga,
+                            diskon: 0,
+                            grand_total: displayHarga - 0
+                        });
+                        
                         // Add the event listener in input
-                        inputOrder.addEventListener('keydown', handleEnterKey);
-                        inputDiskon.addEventListener('keydown', handleEnterKey);
                         document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
                         barcodeValues.length = 0;
+                        document.getElementById('barcodeInput').focus();
                     }
                 });
         }
+    // implementasi barcode
 
+    // add otoritas, implementasi klik yang menggunakan otoritas
         let isPasswordVisible = false;
         const saPassword = @json($saPass);
         const myPassword = @json($myPass);
@@ -424,7 +254,7 @@
                     closePasswordModal();
                 } else if (passwordInput.dataset.action === 'F6' && password === saPassword) {
                     document.getElementById('label-cell').innerText = 'RTN'; // Set to "RTN" for myPassword
-                    document.getElementById('barcodeInputVoid').focus();
+                    document.getElementById('barcodeInputReturn').focus();
                     closePasswordModal();
                 } else {
                     alert("Password salah. Silakan coba lagi.");
@@ -439,6 +269,9 @@
         function handleDefaultVisibility(event) {
             if (event.key === 'Enter' || event.key === 'Escape') {
                 document.getElementById('label-cell').innerText = 'PLU';
+                if (document.getElementById('input-order').value === '' || document.getElementById('input-order').value == 0) {
+                    document.getElementById('input-order').value = 1;
+                }
                 document.getElementById('barcodeInput').focus();
             } else if (event.key === 'F4') {
                 event.preventDefault();
@@ -467,58 +300,60 @@
             isPasswordVisible = false;
             passwordInput.value = '';
         }
+    // add otoritas, implementasi void, return
 
+    // get this detail product for manual search
+        const storedProductDetails = localStorage.getItem('productDetails');
+        if (storedProductDetails) {
+            // Parse the JSON string into an object
+            productDetails = JSON.parse(storedProductDetails);
+
+            // make table
+            const topTbody = document.querySelector('tbody.top');
+            const staticRow = topTbody.querySelector('tr:first-child');
+            productDetails.forEach((data, index) => {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td class="text-center" style="width: 75px;">${data.label}</td>
+                    <td class="text-center" style="width: 200px;">${data.kode_alternatif}</td>
+                    <td>${data.nama}</td>
+                    <td class="text-end" style="width: 100px;">${data.order}</td>
+                    <td class="text-end" style="width: 175px;">${number_format(data.harga)}</td>
+                    <td class="text-end" style="width: 175px;">${data.diskon}</td>
+                    <td class="text-end" style="width: 175px;" id="value-total">${number_format(data.grand_total)}</td>
+                `;
+                topTbody.insertBefore(newRow, staticRow);
+            });
+        }
+        console.log(productDetails)
+    // get this detail product for manual search
+
+    // implementasi klik yang tidak menggunakan otoritas
         document.addEventListener('keydown', function(event) {
-            // all void then print
-            if (event.key === 'F5') {
-                location.reload();
-                // event.preventDefault();
-                // allVoidData();
+            // focus on input qty
+            if (event.key === 'Tab') {
+                event.preventDefault();
+                document.getElementById('input-order').value = '';
+                document.getElementById('input-order').focus();
             }
 
-            // search product
-            if (event.key === 'F11') {
-                event.preventDefault();
-                window.location.href = '/list-barang';
-            }
-
-            // buat fungsi untuk store hold
-            if (event.key === 'F8') {
-                event.preventDefault();
-                submitDataHold();
-                // window.location.href = '/dashboard';
-            }
-
-            // list hold
-            if (event.key === 'F9') {
-                event.preventDefault();
-                window.location.href = '/list-hold';
-            }
-            
             // lihat list tombol
             if (event.key === 't' || event.key === 'T') {
                 const modal = new bootstrap.Modal(document.getElementById('myModal'));
                 modal.show();
             }
 
-            if (event.key === 'r' || event.key === 'R') {
-                window.location.href = '/list-pembelian';
-            }
-
-            // kembali ke pembayaran
-            if (event.key === '>' || event.key === '.') {
-                window.location.href = '/dashboard';
+            // search product - menggunakan local storage untuk menyimpan data sementara
+            if (event.key === 'F11') {
+                event.preventDefault();
+                localStorage.setItem('productDetails', JSON.stringify(productDetails));
+                window.location.href = '/list-barang';
             }
 
             // kirim data dengan fetch
             if (event.key === '?' || event.key === '/') {
                 event.preventDefault();
                 submitData();
-            }
-
-            // reload
-            if (event.key === '-') {
-                location.reload();
             }
 
             // transfer penjualan ke server
@@ -539,18 +374,61 @@
                         console.error('Error:', error); // Handle error
                     });
             }
+            
+            // all void then print
+            if (event.key === 'F5') {
+                window.addEventListener('beforeunload', function() {
+                    localStorage.removeItem('productDetails');
+                });
+                location.reload();
+            }
+
+            // buat fungsi untuk store hold
+            if (event.key === 'F8') {
+                event.preventDefault();
+                submitDataHold();
+            }
+
+            // list hold
+            if (event.key === 'F9') {
+                event.preventDefault();
+                window.location.href = '/list-hold';
+            }
+
+            if (event.key === 'r' || event.key === 'R') {
+                event.preventDefault();
+                window.location.href = '/list-pembelian';
+            }
 
             // kembali barang supplier
             if (event.key === 'y' || event.key === 'Y') {
+                event.preventDefault();
                 window.location.href = '/list-supplier';
+            }
+
+            // kembali ke pembayaran
+            if (event.key === '>' || event.key === '.') {
+                event.preventDefault();
+                window.location.href = '/dashboard';
+            }
+
+            // reload
+            if (event.key === '-') {
+                window.addEventListener('beforeunload', function() {
+                    localStorage.removeItem('productDetails');
+                });
+                location.reload();
             }
 
             // logout
             if (event.key === 'F2') {
+                event.preventDefault();
                 window.location.href = '/logout';
             }
         });
+    // implementasi klik yang tidak menggunakan otoritas
 
+    // store data ke tabel penjualan
         function submitData() {
             const detail = JSON.stringify({
                 products: productDetails,
@@ -579,37 +457,69 @@
                         const topTbody = document.querySelector('tbody.top');
                         const newRow2 = document.createElement('tr');
                         newRow2.innerHTML = `
-                            <td></td><td></td><td></td><td class="text-end">1</td><td class="text-end">0</td><td class="text-end">0</td><td class="text-end">0</td>
+                            <td style="width: 75px;"></td><td style="width: 200px;"></td><td></td><td style="width: 100px;" class="text-end">1</td><td style="width: 175px;" class="text-end">0</td><td style="width: 175px;" class="text-end">0</td><td style="width: 175px;" class="text-end">0</td>
                         `;
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
-                            <td class="text-center">STL</td>
-                            <td class="text-center"></td>
+                            <td style="width: 75px;" class="text-center">STL</td>
+                            <td style="width: 200px;" class="text-center"></td>
                             <td>SUBTOTAL</td>
-                            <td class="text-end">1</td>
-                            <td class="text-end">${number_format(data.penjualan.grand_total)}</td>
-                            <td class="text-end">0</td>
-                            <td class="text-end" id="value-total">${number_format(data.penjualan.grand_total)}</td>
+                            <td style="width: 100px;" class="text-end">1</td>
+                            <td style="width: 175px;" class="text-end">${number_format(data.penjualan.grand_total)}</td>
+                            <td style="width: 175px;" class="text-end">0</td>
+                            <td style="width: 175px;" class="text-end" id="value-total">${number_format(data.penjualan.grand_total)}</td>
                         `;
                         topTbody.appendChild(newRow2);
                         topTbody.appendChild(newRow);
 
                         printReceipt(data.printData);
+
+                        // Clear localStorage on page unload
+                        window.addEventListener('beforeunload', function() {
+                            localStorage.removeItem('productDetails');
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('There was a problem with the fetch operation:', error);
                 });
         }
+    // store data ke tabel penjualan
 
-        function printReceipt(printData) {
-            // Open a new window or use a printing library to send the print data to the thermal printer
-            const printWindow = window.open('', '', 'height=400,width=300');
-            printWindow.document.write('<pre>' + printData + '</pre>');
-            printWindow.document.close();
-            printWindow.print();
-        }
+    // cetak data
+    function printReceipt(printData) {
+        // Membuka jendela baru untuk pencetakan
+        const printWindow = window.open('', '', 'height=400,width=300');
+        
+        // Menyusun isi struk dalam format HTML
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Struk Pembayaran</title>
+                    <style>
+                        body {
+                            font-family: monospace;
+                            font-size: 12px;
+                            margin: 0;
+                            padding: 10px;
+                        }
+                        pre {
+                            white-space: pre-wrap; /* Mengatur spasi */
+                        }
+                    </style>
+                </head>
+                <body>
+                    <pre>${printData}</pre>
+                </body>
+            </html>
+        `);
+        
+        printWindow.document.close();
+        printWindow.print();
+    }
+    // cetak data
 
+    // progress - store data hold
         function submitDataHold() {
             const detail = JSON.stringify({
                 products: productDetails,
@@ -643,9 +553,12 @@
                     console.error('There was a problem with the fetch operation:', error);
                 });
         }
+    // progress - store data hold
 
+    // number format
         function number_format(number) {
             return Number(number).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
+    // number format
     </script>
 @endsection
