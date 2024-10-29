@@ -7,7 +7,7 @@
             </div> --}}
             <div class="modal-body">
                 <div class="d-flex justify-content-center mt-4">
-                    <div style="overflow-x: auto; height: 565px; border: 1px solid #ccc;">
+                    <div id="scrollableDiv" style="overflow-x: auto; height: 565px; border: 1px solid #ccc;">
                         <table class="table" style="width: 100%; table-layout: auto;">
                             <thead>
                                 <tr style="border: 1px solid black; font-size: 12px;">
@@ -115,6 +115,14 @@
                                 <tr>
                                     <td class="text-center" style="font-size: 24px;"><b>R</b></td>
                                     <td style="font-size: 24px;">LIST PEMBELIAN</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
+                                </tr>
+
+                                <tr>
+                                    <td class="text-center" style="font-size: 24px;"><b>F12</b></td>
+                                    <td style="font-size: 24px;">LAPORAN KASIR</td>
                                 </tr>
                                 <tr>
                                     <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>

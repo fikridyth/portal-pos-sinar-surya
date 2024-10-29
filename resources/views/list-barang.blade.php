@@ -48,6 +48,8 @@
             const oldProductDetails = localStorage.getItem('productDetails');
             let productDetails = JSON.parse(oldProductDetails);
             let grandTotal = Number(localStorage.getItem('grandTotal')) || 0;
+            let grandDiskon = Number(localStorage.getItem('grandDiskon')) || 0;
+            let grandTotalDiskon = Number(localStorage.getItem('grandTotalDiskon')) || 0;
             let inputOrder = Number(localStorage.getItem('inputOrder'));
             let scanLabel = localStorage.getItem('scanLabel');
 
@@ -75,10 +77,13 @@
                     };
                     productDetails.push(newProductDetails);
                     grandTotal += Number(displayHarga * inputOrder);
+                    grandTotalDiskon += Number(displayHarga * inputOrder);
 
                     // Store product details in localStorage
                     localStorage.setItem('productDetails', JSON.stringify(productDetails));
                     localStorage.setItem('grandTotal', grandTotal);
+                    localStorage.setItem('grandDiskon', grandDiskon);
+                    localStorage.setItem('grandTotalDiskon', grandTotalDiskon);
                     localStorage.removeItem('inputOrder');
                     localStorage.removeItem('scanLabel');
                     window.location.href = '/';
