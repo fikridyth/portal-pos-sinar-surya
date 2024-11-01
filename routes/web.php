@@ -63,4 +63,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/penjualan/hold', [HomeController::class, 'holdPenjualan'])->name('penjualan.hold');
     Route::get('/list-hold', [HomeController::class, 'listHold'])->name('list-hold');
     Route::get('/index-hold/{id}', [HomeController::class, 'indexHold'])->name('index-hold');
+
+    // laporan kasir
+    Route::get('/laporan-kasir', [HomeController::class, 'laporanKasir'])->name('laporan-kasir');
+    Route::get('/index-laporan-kasir', [HomeController::class, 'indexLaporanKasir'])->name('index-laporan-kasir');
+
+    // end of day
+    Route::get('/end-of-day', [HomeController::class, 'endOfDay'])->name('end-of-day');
+    Route::get('/index-end-of-day', [HomeController::class, 'indexEndOfDay'])->name('index-end-of-day');
 });

@@ -332,4 +332,46 @@ class HomeController extends Controller
             </html>";
         return $output;
     }
+
+    public function laporanKasir()
+    {
+        $title = 'Laporan Kasir';
+
+        return view('laporan-kasir', compact('title'));
+    }
+
+    public function indexLaporanKasir()
+    {
+        $title = 'Detail Laporan Kasir';
+        $penjualans = Penjualan::get()
+            ->groupBy('tanggal')
+            ->map(function($items) {
+                return [
+                    'tanggal' => $items->pluck('tanggal')->first(),
+                    'created_by' => $items->pluck('created_by')->first(),
+                    'grand_total' => $items->sum('grand_total'),
+                    'jam' => $items->max('jam'),
+                    'transaksi' => count($items),
+                ];
+            });
+        $totalHarga = $penjualans->sum('grand_total');
+
+        return view('index-laporan-kasir', compact('title', 'penjualans', 'totalHarga'));
+    }
+
+    public function endOfDay()
+    {
+        $title = 'End Of Day';
+
+        return view('end-of-day', compact('title'));
+    }
+
+    public function indexEndOfDay()
+    {
+        $title = 'Detail End Of Day';
+        $penjualans = Penjualan::all();
+        dd($penjualans);
+
+        return view('index-end-of-day', compact('title'));
+    }
 }

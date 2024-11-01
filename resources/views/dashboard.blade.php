@@ -56,13 +56,13 @@
                         <th style="width: 100px;">JUMLAH</th>
                         <th style="width: 175px;">HARGA</th>
                         <th style="width: 175px;">DISKON</th>
-                        <th style="width: 175px;">TOTAL</th>
+                        <th style="width: 194px;">TOTAL</th>
                     </tr>
                 </thead>
                     {{-- <input type="text" style="background-color: black; color: white; text-align: right; border: 1px solid white;"
                         id="input-diskon" value="0" onkeypress='return event.charCode >= 48 && event.charCode <= 57'> --}}
                 <tbody class="top">
-                    <tr>
+                    <tr style="height: 550px;">
                         <td class="text-center" id="label-cell" style="width: 75px;">PLU</td>
                         <td class="text-center" style="width: 200px;"></td>
                         <td></td>
@@ -241,11 +241,11 @@
 
             if (event.key === 'Enter') {
                 if (passwordInput.dataset.action === 'F4' && password === saPassword) {
-                    document.getElementById('label-cell').innerText = 'VOD'; // Set to "VOD" for saPassword
+                    document.getElementById('label-cell').innerText = 'VOD';
                     document.getElementById('barcodeInputVoid').focus();
                     closePasswordModal();
                 } else if (passwordInput.dataset.action === 'F6' && password === saPassword) {
-                    document.getElementById('label-cell').innerText = 'RTN'; // Set to "RTN" for myPassword
+                    document.getElementById('label-cell').innerText = 'RTN';
                     document.getElementById('barcodeInputReturn').focus();
                     closePasswordModal();
                 } else if ((passwordInput.dataset.action === 'p' || passwordInput.dataset.action === 'P') && password === saPassword) {
@@ -366,6 +366,42 @@
                         alert("Tidak ada data yang dirubah.");
                         passwordInput.value = '';
                     }
+                } else if (passwordInput.dataset.action === 'F7' && password === saPassword) {
+                    event.preventDefault();
+                    window.addEventListener('beforeunload', function() {
+                        localStorage.removeItem('productDetails');
+                        localStorage.removeItem('grandTotal');
+                        localStorage.removeItem('grandDiskon');
+                        localStorage.removeItem('grandTotalDiskon');
+                    });
+                    window.location.href = '/end-of-day';
+                } else if (passwordInput.dataset.action === 'F12' && password === saPassword) {
+                    event.preventDefault();
+                    window.addEventListener('beforeunload', function() {
+                        localStorage.removeItem('productDetails');
+                        localStorage.removeItem('grandTotal');
+                        localStorage.removeItem('grandDiskon');
+                        localStorage.removeItem('grandTotalDiskon');
+                    });
+                    window.location.href = '/laporan-kasir';
+                } else if ((passwordInput.dataset.action === 'y' || passwordInput.dataset.action === 'Y') && (password === saPassword || password === myPassword)) {
+                    event.preventDefault();
+                    window.addEventListener('beforeunload', function() {
+                        localStorage.removeItem('productDetails');
+                        localStorage.removeItem('grandTotal');
+                        localStorage.removeItem('grandDiskon');
+                        localStorage.removeItem('grandTotalDiskon');
+                    });
+                    window.location.href = '/list-supplier';
+                } else if (passwordInput.dataset.action === 'F5' && password === saPassword) {
+                    event.preventDefault();
+                    window.addEventListener('beforeunload', function() {
+                        localStorage.removeItem('productDetails');
+                        localStorage.removeItem('grandTotal');
+                        localStorage.removeItem('grandDiskon');
+                        localStorage.removeItem('grandTotalDiskon');
+                    });
+                    location.reload();
                 } else {
                     alert("Password salah. Silakan coba lagi.");
                     passwordInput.value = '';
@@ -411,6 +447,26 @@
                 event.preventDefault();
                 passwordInput.value = '';
                 handlePasswordModal('+');
+            } else if (event.key === 'y') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('y');
+            } else if (event.key === 'Y') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('Y');
+            } else if (event.key === 'F7') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('F7');
+            } else if (event.key === 'F12') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('F12');
+            } else if (event.key === 'F5') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('F5');
             }
         }
 
@@ -533,16 +589,6 @@
                         console.error('Error:', error); // Handle error
                     });
             }
-            
-            // all void then print
-            if (event.key === 'F5') {
-                event.preventDefault();
-                window.addEventListener('beforeunload', function() {
-                    localStorage.removeItem('productDetails');
-                    localStorage.removeItem('grandTotal');
-                });
-                location.reload();
-            }
 
             // buat fungsi untuk store hold
             if (event.key === 'F8') {
@@ -556,6 +602,8 @@
                 window.addEventListener('beforeunload', function() {
                     localStorage.removeItem('productDetails');
                     localStorage.removeItem('grandTotal');
+                    localStorage.removeItem('grandDiskon');
+                    localStorage.removeItem('grandTotalDiskon');
                 });
                 window.location.href = '/list-hold';
             }
@@ -565,18 +613,10 @@
                 window.addEventListener('beforeunload', function() {
                     localStorage.removeItem('productDetails');
                     localStorage.removeItem('grandTotal');
+                    localStorage.removeItem('grandDiskon');
+                    localStorage.removeItem('grandTotalDiskon');
                 });
                 window.location.href = '/list-pembelian';
-            }
-
-            // kembali barang supplier
-            if (event.key === 'y' || event.key === 'Y') {
-                event.preventDefault();
-                window.addEventListener('beforeunload', function() {
-                    localStorage.removeItem('productDetails');
-                    localStorage.removeItem('grandTotal');
-                });
-                window.location.href = '/list-supplier';
             }
 
             // kembali ke pembayaran
@@ -585,6 +625,8 @@
                 window.addEventListener('beforeunload', function() {
                     localStorage.removeItem('productDetails');
                     localStorage.removeItem('grandTotal');
+                    localStorage.removeItem('grandDiskon');
+                    localStorage.removeItem('grandTotalDiskon');
                 });
                 window.location.href = '/dashboard';
             }
@@ -594,6 +636,8 @@
                 window.addEventListener('beforeunload', function() {
                     localStorage.removeItem('productDetails');
                     localStorage.removeItem('grandTotal');
+                    localStorage.removeItem('grandDiskon');
+                    localStorage.removeItem('grandTotalDiskon');
                 });
                 location.reload();
             }
@@ -604,6 +648,8 @@
                 window.addEventListener('beforeunload', function() {
                     localStorage.removeItem('productDetails');
                     localStorage.removeItem('grandTotal');
+                    localStorage.removeItem('grandDiskon');
+                    localStorage.removeItem('grandTotalDiskon');
                 });
                 window.location.href = '/logout';
             }
@@ -660,6 +706,8 @@
                         window.addEventListener('beforeunload', function() {
                             localStorage.removeItem('productDetails');
                             localStorage.removeItem('grandTotal');
+                            localStorage.removeItem('grandDiskon');
+                            localStorage.removeItem('grandTotalDiskon');
                         });
                     }
                 })
@@ -732,6 +780,8 @@
                         window.addEventListener('beforeunload', function() {
                             localStorage.removeItem('productDetails');
                             localStorage.removeItem('grandTotal');
+                            localStorage.removeItem('grandDiskon');
+                            localStorage.removeItem('grandTotalDiskon');
                         });
                         location.reload();
                     }
