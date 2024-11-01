@@ -169,7 +169,15 @@
                     if (data.error) {
                         alert (data.error)
                     } else {
-                        const hargaJual = data.product.harga_jual;
+                        // implementasi harga sementara
+                        const now = new Date();
+                        const currentDate = now.toISOString().split('T')[0];
+                        let hargaJual;
+                        if (data.product.harga_sementara && (data.product.tanggal_awal <= currentDate && data.product.tanggal_akhir >= currentDate)) {
+                            hargaJual = data.product.harga_sementara;
+                        } else {
+                            hargaJual = data.product.harga_jual;
+                        }
                         const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
                         const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder : inputOrder;
 

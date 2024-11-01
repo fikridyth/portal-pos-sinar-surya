@@ -60,7 +60,16 @@
                 if (event.target.classList.contains('product-link')) {
                     event.preventDefault(); // Prevent default link behavior
                     const link = event.target; // Reference to the clicked link
-                    const hargaJual = parseFloat(link.getAttribute('data-harga-jual'));
+                    const now = new Date();
+                    const currentDate = now.toISOString().split('T')[0];
+
+                    // implementasi harga sementara
+                    let hargaJual;
+                    if (link.getAttribute('data-harga-sementara') && (link.getAttribute('data-tanggal-awal') <= currentDate && link.getAttribute('data-tanggal-akhir') >= currentDate)) {
+                        hargaJual = parseFloat(link.getAttribute('data-harga-sementara'));
+                    } else {
+                        hargaJual = parseFloat(link.getAttribute('data-harga-jual'));
+                    }
                     const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
                     const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder : inputOrder;
 

@@ -21,7 +21,8 @@ class ProductDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
-        return (new EloquentDataTable($query->whereNotNull('kode_alternatif')->where('kode_alternatif', '!=', '')->orderBy('created_at', 'desc')))
+        // return (new EloquentDataTable($query->whereNotNull('kode_alternatif')->where('kode_alternatif', '!=', '')->orderBy('created_at', 'desc')))
+        return (new EloquentDataTable($query->orderBy('created_at', 'desc')))
         ->addIndexColumn()
         ->editColumn('created_at', function ($row) {
             return $row->created_at->setTimezone('Asia/Jakarta')->format('d F Y, H:i:s');
@@ -36,13 +37,20 @@ class ProductDataTable extends DataTable
             data-harga-jual="' . $row->harga_jual . '" 
             data-stok="' . $row->stok . '" 
             data-harga-pokok="' . $row->harga_pokok . '" 
+            data-harga-sementara="' . $row->harga_sementara . '" 
+            data-tanggal-awal="' . $row->tanggal_awal . '" 
+            data-tanggal-akhir="' . $row->tanggal_akhir . '" 
             class="product-link">' . $row->nama . '/' . $row->unit_jual . '</a>';
         })
         ->editColumn('harga_pokok', function ($row) {
             return number_format($row->harga_pokok);
         })
         ->editColumn('harga_jual', function ($row) {
-            return number_format($row->harga_jual);
+            if (isset($row->harga_sementara) && ($row->tanggal_awal <= now()->format('Y-m-d') && $row->tanggal_akhir >= now()->format('Y-m-d'))) {
+                return number_format($row->harga_sementara);
+            } else {
+                return number_format($row->harga_jual);
+            }
         })
         ->rawColumns(['nama']);
     }

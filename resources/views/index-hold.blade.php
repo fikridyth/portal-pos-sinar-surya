@@ -128,7 +128,15 @@
             fetch(`/get-detail-products/${kode}`)
                 .then(response => response.json())
                 .then(data => {
-                    const hargaJual = data.product.harga_jual;
+                    // implementasi harga sementara
+                    const now = new Date();
+                    const currentDate = now.toISOString().split('T')[0];
+                    let hargaJual;
+                    if (data.product.harga_sementara && (data.product.tanggal_awal <= currentDate && data.product.tanggal_akhir >= currentDate)) {
+                        hargaJual = data.product.harga_sementara;
+                    } else {
+                        hargaJual = data.product.harga_jual;
+                    }
                     const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
 
                     const newRow = document.createElement('tr');
@@ -226,7 +234,7 @@
                                 kode: data.product.kode,
                                 nama: data.product.nama + '/' + data.product.unit_jual,
                                 harga: displayHarga,
-                                order: totalHarga / data.product.harga_jual,
+                                order: totalHarga / displayHarga,
                                 total: totalHarga,
                                 diskon: totalDiskon,
                                 grand_total: totalHarga - totalDiskon
