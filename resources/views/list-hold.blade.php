@@ -59,10 +59,10 @@
                         <thead>
                             <tr>
                                 <th class="text-center text-black">NAMA BARANG</th>
-                                <th class="text-center text-black">JUMLAH</th>
-                                <th class="text-center text-black">HARGA</th>
-                                <th class="text-center text-black">DISKON</th>
-                                <th class="text-center text-black">TOTAL</th>
+                                <th class="text-center text-black" style="width: 100px;">JUMLAH</th>
+                                <th class="text-center text-black" style="width: 100px;">HARGA</th>
+                                <th class="text-center text-black" style="width: 100px;">DISKON</th>
+                                <th class="text-center text-black" style="width: 100px;">TOTAL</th>
                             </tr>
                         </thead>
                         <tbody id="orderDetailTableBody">
@@ -100,10 +100,10 @@
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
                             <td class="text-black">${item.nama}</td>
-                            <td class="text-center text-black">${item.order}</td>
-                            <td class="text-end text-black">${number_format(item.harga)}</td>
-                            <td class="text-end text-black">${number_format(item.diskon)}</td>
-                            <td class="text-end text-black">${number_format(item.grand_total)}</td>
+                            <td class="text-end text-black" style="width: 100px;">${item.order}</td>
+                            <td class="text-end text-black" style="width: 100px;">${number_format(item.harga)}</td>
+                            <td class="text-end text-black" style="width: 100px;">${number_format(item.diskon)}</td>
+                            <td class="text-end text-black" style="width: 100px;">${number_format(item.grand_total)}</td>
                         `;
                         tbody.appendChild(newRow);
                     });

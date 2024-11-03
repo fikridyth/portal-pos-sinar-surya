@@ -188,7 +188,7 @@ class HomeController extends Controller
     public function listHold()
     {
         $title = 'List Hold';
-        $penjualans = Hold::whereNull('is_used')->get();
+        $penjualans = Hold::all();
 
         return view('list-hold', compact('title', 'penjualans'));
     }
@@ -197,8 +197,10 @@ class HomeController extends Controller
     {
         $title = 'Index Hold';
         $hold = Hold::find($id);
+        $saPass = User::where('name', 'LO HARYANTO')->pluck('show_password')->first();
+        $myPass = auth()->user()->show_password;
 
-        return view('index-hold', compact('title', 'hold'));
+        return view('index-hold', compact('title', 'hold', 'saPass', 'myPass'));
     }
 
     // list product for cash
@@ -370,7 +372,7 @@ class HomeController extends Controller
     {
         $title = 'Detail End Of Day';
         $penjualans = Penjualan::all();
-        dd($penjualans);
+        // dd($penjualans);
 
         return view('index-end-of-day', compact('title'));
     }
