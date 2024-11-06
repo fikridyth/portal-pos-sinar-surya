@@ -36,9 +36,9 @@
             </div>
             <div class="d-flex justify-content-between">
                 <h1 id="big-name" style="color: white;"></h1>
-                <input type="text" id="barcodeInput" style="width: 1px; opacity: 0;" autofocus>
-                <input type="text" id="barcodeInputVoid" style="width: 1px; opacity: 0;">
-                <input type="text" id="barcodeInputReturn" style="width: 1px; opacity: 0;">
+                <input type="text" id="barcodeInput" autocomplete="off" style="width: 1px; opacity: 0;" autofocus>
+                <input type="text" id="barcodeInputVoid" autocomplete="off" style="width: 1px; opacity: 0;">
+                <input type="text" id="barcodeInputReturn" autocomplete="off" style="width: 1px; opacity: 0;">
 
                 <div id="passwordModal" class="modal-password" style="display:none;">
                     <div class="modal-content-password">
@@ -179,7 +179,7 @@
                             hargaJual = data.product.harga_jual;
                         }
                         const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
-                        const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder : inputOrder;
+                        const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder.value : inputOrder.value;
 
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
@@ -199,9 +199,9 @@
                         }
 
                         // update total harga
-                        grandTotal += displayHarga;
+                        grandTotal += displayHarga * inputOrder.value;
                         grandDiskon += 0;
-                        grandTotalDiskon += displayHarga;
+                        grandTotalDiskon += displayHarga * inputOrder.value;
                         document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
                         document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
                         document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
@@ -222,6 +222,8 @@
                         // Add the event listener in input
                         document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
                         barcodeValues.length = 0;
+                        document.getElementById("input-text").innerHTML = 1;
+                        document.getElementById("input-order").value = 1;
                         document.getElementById('barcodeInput').focus();
                     }
                 });
@@ -512,7 +514,7 @@
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
                     <td class="text-center" style="width: 75px;">${data.label}</td>
-                    <td class="text-center" style="width: 200px;">${data.kode_alternatif}</td>
+                    <td class="text-center" style="width: 200px;">${data.kode_alternatif !== null && data.kode_alternatif !== undefined ? data.kode_alternatif : ''}</td>
                     <td>${data.nama}</td>
                     <td class="text-end" style="width: 100px;">${data.order}</td>
                     <td class="text-end" style="width: 175px;">${number_format(data.harga)}</td>
@@ -692,8 +694,10 @@
                     } else {
                         const topTbody = document.querySelector('tbody.top');
                         const newRow2 = document.createElement('tr');
+                        const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+
                         newRow2.innerHTML = `
-                            <td style="width: 75px;"></td><td style="width: 200px;"></td><td></td><td style="width: 100px;" class="text-end">1</td><td style="width: 175px;" class="text-end">0</td><td style="width: 175px;" class="text-end">0</td><td style="width: 175px;" class="text-end">0</td>
+                            <td style="width: 75px;"></td><td style="width: 200px;"></td><td></td><td style="width: 100px;" class="text-end"></td><td style="width: 175px;" class="text-end"></td><td style="width: 175px;" class="text-end"></td><td style="width: 175px;" class="text-end"></td>
                         `;
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
@@ -705,18 +709,18 @@
                             <td style="width: 175px;" class="text-end" id="input-diskon">${number_format(data.penjualan.diskon ?? 0)}</td>
                             <td style="width: 175px;" class="text-end" id="value-total">${number_format(data.penjualan.total - (data.penjualan.diskon ?? 0))}</td>
                         `;
-                        topTbody.appendChild(newRow2);
-                        topTbody.appendChild(newRow);
+                        topTbody.insertBefore(newRow2, lastInsertedRow);
+                        topTbody.insertBefore(newRow, lastInsertedRow);
 
                         printReceipt(data.printData);
 
                         // Clear localStorage on page unload
-                        window.addEventListener('beforeunload', function() {
-                            localStorage.removeItem('productDetails');
-                            localStorage.removeItem('grandTotal');
-                            localStorage.removeItem('grandDiskon');
-                            localStorage.removeItem('grandTotalDiskon');
-                        });
+                        // window.addEventListener('beforeunload', function() {
+                            // localStorage.removeItem('productDetails');
+                            // localStorage.removeItem('grandTotal');
+                            // localStorage.removeItem('grandDiskon');
+                            // localStorage.removeItem('grandTotalDiskon');
+                        // });
                     }
                 })
                 .catch(error => {

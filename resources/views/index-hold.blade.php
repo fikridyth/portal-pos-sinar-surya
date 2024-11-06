@@ -89,21 +89,21 @@
                 </tbody>
                 <tbody class="bottom">
                     <tr>
-                        <td class="text-end" id="big-total" colspan="5" style="font-size: 56px;">0</td>
+                        <td class="text-end" id="big-total" colspan="5" style="font-size: 56px;">{{ number_format($hold->grand_total) }}</td>
                         <td class="text-end" colspan="2">
                             <div class="d-flex justify-content-between">
                                 <div>JUMLAH</div>
-                                <div id="small-jumlah">0</div>
+                                <div id="small-jumlah">{{ number_format($hold->total) }}</div>
                             </div>
                             <hr style="border: 1px solid white; opacity: 1; margin: 2px 0 4px 0">
                             <div class="d-flex justify-content-between">
                                 <div>DISKON</div>
-                                <div id="small-diskon">0</div>
+                                <div id="small-diskon">{{ number_format($hold->diskon) }}</div>
                             </div>
                             <hr style="border: 1px solid white; opacity: 1; margin: 2px 0 4px 0">
                             <div class="d-flex justify-content-between">
                                 <div>TOTAL</div>
-                                <div id="small-total">0</div>
+                                <div id="small-total">{{ number_format($hold->grand_total) }}</div>
                             </div>
                         </td>
                     </tr>
@@ -120,7 +120,8 @@
     <script>
         // implementasi barcode
         const barcodeValues = [];
-        let productDetails = [];
+        const dataHold = @json($hold);
+        let productDetails = JSON.parse(dataHold.detail);
         let inputTimeout;
         let grandTotal = 0;
         let grandDiskon = 0;
@@ -236,6 +237,12 @@
                         .unit_jual;
                         barcodeValues.length = 0;
                         document.getElementById('barcodeInput').focus();
+
+                        localStorage.setItem('productDetails', productDetails);
+                        localStorage.setItem('grandTotal', dataHold.total + displayHarga);
+                        localStorage.setItem('grandDiskon', dataHold.diskon);
+                        localStorage.setItem('grandTotalDiskon', dataHold.grand_total + displayHarga);
+                        window.location.href = '/';
                     }
                 });
         }
@@ -531,7 +538,7 @@
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
                                     <td class="text-center" style="width: 75px;">${data.label}</td>
-                                    <td class="text-center" style="width: 200px;">${data.kode_alternatif}</td>
+                                    <td class="text-center" style="width: 200px;">${data.kode_alternatif !== null && data.kode_alternatif !== undefined ? data.kode_alternatif : ''}</td>
                                     <td>${data.nama}</td>
                                     <td class="text-end" style="width: 100px;">${data.order}</td>
                                     <td class="text-end" style="width: 175px;">${number_format(data.harga)}</td>
@@ -583,10 +590,10 @@
             // search product - menggunakan local storage untuk menyimpan data sementara
             if (event.key === 'F11') {
                 event.preventDefault();
-                localStorage.setItem('productDetails', JSON.stringify(productDetails));
-                localStorage.setItem('grandTotal', grandTotal);
-                localStorage.setItem('grandDiskon', grandDiskon);
-                localStorage.setItem('grandTotalDiskon', grandTotalDiskon);
+                localStorage.setItem('productDetails', dataHold.detail);
+                localStorage.setItem('grandTotal', dataHold.total);
+                localStorage.setItem('grandDiskon', dataHold.diskon);
+                localStorage.setItem('grandTotalDiskon', dataHold.grand_total);
                 localStorage.setItem('inputOrder', inputOrder.value);
                 localStorage.setItem('scanLabel', document.getElementById('label-cell').innerText);
                 window.location.href = '/list-barang';
@@ -824,5 +831,15 @@
             return Number(number).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         }
         // number format
+
+        // window.addEventListener('beforeunload', function() {
+        localStorage.setItem('productDetails', dataHold.detail);
+        localStorage.setItem('grandTotal', dataHold.total);
+        localStorage.setItem('grandDiskon', dataHold.diskon);
+        localStorage.setItem('grandTotalDiskon', dataHold.grand_total);
+
+        // Redirect ke halaman dashboard setelah data disimpan
+        window.location.href = '/dashboard';
+        // });
     </script>
 @endsection

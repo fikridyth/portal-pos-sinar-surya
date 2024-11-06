@@ -188,7 +188,7 @@ class HomeController extends Controller
     public function listHold()
     {
         $title = 'List Hold';
-        $penjualans = Hold::all();
+        $penjualans = Hold::whereNull('is_view')->get();
 
         return view('list-hold', compact('title', 'penjualans'));
     }
@@ -197,6 +197,7 @@ class HomeController extends Controller
     {
         $title = 'Index Hold';
         $hold = Hold::find($id);
+        $hold->update(['is_view' => 1]);
         $saPass = User::where('name', 'LO HARYANTO')->pluck('show_password')->first();
         $myPass = auth()->user()->show_password;
 
