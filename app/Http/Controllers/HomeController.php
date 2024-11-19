@@ -70,25 +70,27 @@ class HomeController extends Controller
         }
         $getNomor = str_pad($sequence, 6, 0, STR_PAD_LEFT);
 
+        $dataPenjualan = [
+            'tanggal' => Carbon::now()->setTimezone('Asia/Jakarta')->format('Y-m-d'),
+            'jam' => Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i:s'),
+            'detail' => json_encode($products),
+            'total' => $request->grandTotal,
+            'diskon' => $request->grandDiskon,
+            'grand_total' => $request->grandTotal - $request->grandDiskon,
+            'no' => $getNomor,
+            'created_by' => auth()->user()->name
+        ];
+
         // dd($products);
         if ($products !== []) {
-            $penjualan = Penjualan::create([
-                'tanggal' => Carbon::now()->setTimezone('Asia/Jakarta')->format('Y-m-d'),
-                'jam' => Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i:s'),
-                'detail' => json_encode($products),
-                'total' => $request->grandTotal,
-                'diskon' => $request->grandDiskon,
-                'grand_total' => $request->grandTotal - $request->grandDiskon,
-                'no' => $getNomor,
-                'created_by' => auth()->user()->name
-            ]);
+            Penjualan::create($dataPenjualan);
         } else {
             return response()->json(['error' => 'No data scanned!']);
         }
 
-        $printData = $this->formatPrintData($penjualan, $products);
+        $printData = $this->formatPrintData($dataPenjualan, $products);
         
-        return response()->json(['penjualan' => $penjualan, 'printData' => $printData]);
+        return response()->json(['penjualan' => $dataPenjualan, 'printData' => $printData]);
     }
 
     public function printPembelian(Request $request)
@@ -102,6 +104,7 @@ class HomeController extends Controller
 
     private function formatPrintData($penjualan, $products)
     {
+        // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
         $output = "
             <html>
                 <head>
@@ -111,10 +114,16 @@ class HomeController extends Controller
                             width: 58mm; 
                             margin: 0 auto; 
                         }
+                        .header-item { 
+                            display: flex; 
+                            justify-content: space-between;
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
                         .header { 
                             text-align: center; 
                             margin-bottom: 10px; 
-                            font-size: 12px; 
+                            font-size: 10px; 
                         }
                         .products { 
                             margin-top: 5px; 
@@ -127,36 +136,192 @@ class HomeController extends Controller
                             font-size: 10px; 
                         }
                         .total { 
-                            margin-top: 5px; 
+                            margin-top: 8px; 
                             font-weight: bold; 
                         }
                         .separator { 
                             margin-top: 5px; 
                             border-top: 1px dashed black; 
                         }
+                        .separator-second {
+                            margin-top: -5px; 
+                            border-top: 1px dashed black; 
+                        }
                     </style>
                 </head>
-                <body>
-                    <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
-    
+                <body>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>***</span>";
+        $output .= "<span>SINAR SURYA</span>";
+        $output .= "<span>***</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>*</span>";
+        $output .= "<span>JL. PASAR BARU NO. 42</span>";
+        $output .= "<span>*</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>***</span>";
+        $output .= "<span>BOGOR</span>";
+        $output .= "<span>***</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item' style='margin-bottom: 15px;'>";
+        $output .= "<span>TELP. (0251)8324647</span>";
+        $output .= "<span>FAX. (0251) 835702</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
+        
         foreach ($products as $product) {
+            // dd($product['order']);
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
-            $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+            if ($product['order'] == 1) {
+                $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+            }
             $output .= "</div>";
+            if ($product['order'] > 1) {
+                $output .= "<div class='product-item'>";
+                $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format($product['harga'], 0, ',', '.') . "</span>";
+                $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+                $output .= "</div>";
+            }
         }
         
         $output .= "<div class='separator'></div>";
-        $output .= "<div class='product-item'>";
+        $output .= "<div class='product-item' style='margin-top: 7px;'>";
         $output .= "<span>TOTAL</span>";
-        $output .= "<span>" . number_format($penjualan->grand_total, 0, ',', '.') . "</span>";
+        $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
         $output .= "</div>";
         $output .= "<div class='product-item'>";
         $output .= "<span class='total'>" . auth()->user()->name . "</span>";
-        $output .= "<span class='total'>( NO#:{$penjualan->no} )</span>";
-        $output .= "<span class='total'>QTY: " . count($products) . "</span>";
+        $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
+        $output .= "<span class='total'>QTY: " . array_sum(array_column($products, 'order')) . "</span>";
         $output .= "</div>";
-        $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
+        $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>";
+        $output .= "<div class='separator'></div>";
+        $output .= "<div class='separator-second'></div>
+                </body>
+            </html>";
+        return $output;
+    }
+
+    public function ReprintPembelian(Request $request)
+    {
+        $penjualan = Penjualan::find($request->id);
+        $products = json_decode($request->input('detail'), true);
+        $printData = $this->formatReprintData($penjualan, $products);
+
+        return response()->json(['printData' => $printData]);
+    }
+
+    private function formatReprintData($penjualan, $products)
+    {
+        // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
+        $output = "
+            <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            width: 58mm; 
+                            margin: 0 auto; 
+                        }
+                        .header-item { 
+                            display: flex; 
+                            justify-content: space-between;
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 10px; 
+                            font-size: 10px; 
+                        }
+                        .products { 
+                            margin-top: 5px; 
+                        }
+                        .product-item { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .total { 
+                            margin-top: 8px; 
+                            font-weight: bold; 
+                        }
+                        .separator { 
+                            margin-top: 5px; 
+                            border-top: 1px dashed black; 
+                        }
+                        .separator-second {
+                            margin-top: -5px; 
+                            border-top: 1px dashed black; 
+                        }
+                    </style>
+                </head>
+                <body>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>***</span>";
+        $output .= "<span>SINAR SURYA</span>";
+        $output .= "<span>***</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>*</span>";
+        $output .= "<span>JL. PASAR BARU NO. 42</span>";
+        $output .= "<span>*</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>***</span>";
+        $output .= "<span>BOGOR</span>";
+        $output .= "<span>***</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item' style='margin-bottom: 15px;'>";
+        $output .= "<span>TELP. (0251)8324647</span>";
+        $output .= "<span>FAX. (0251) 835702</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
+        
+        foreach ($products as $product) {
+            // dd($product['order']);
+            $output .= "<div class='product-item'>";
+            $output .= "<span>{$product['nama']}</span>";
+            if ($product['order'] == 1) {
+                $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+            }
+            $output .= "</div>";
+            if ($product['order'] > 1) {
+                $output .= "<div class='product-item'>";
+                $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format($product['harga'], 0, ',', '.') . "</span>";
+                $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+                $output .= "</div>";
+            }
+        }
+        
+        $output .= "<div class='separator'></div>";
+        $output .= "<div class='product-item' style='margin-top: 7px;'>";
+        $output .= "<span>TOTAL</span>";
+        $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
+        $output .= "</div>";
+        $output .= "<div class='product-item'>";
+        $output .= "<span class='total'>" . auth()->user()->name . "</span>";
+        $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
+        $output .= "<span class='total'>QTY: " . array_sum(array_column($products, 'order')) . "</span>";
+        $output .= "</div>";
+        $output .= "<div class='header total' style='margin-top: 10px;'>(## REPRINT ##)</div>";
+        $output .= "<div class='separator'></div>";
+        $output .= "<div class='separator-second'></div>
                 </body>
             </html>";
         return $output;
