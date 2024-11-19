@@ -45,7 +45,7 @@ Route::middleware('auth')->group(function () {
 
     // list pembelian dan print
     Route::get('/list-pembelian', [HomeController::class, 'listPembelian'])->name('list-pembelian');
-    Route::post('/print-pembelian', [HomeController::class, 'printPembelian'])->name('print-pembelian');
+    Route::post('/reprint-pembelian', [HomeController::class, 'ReprintPembelian'])->name('reprint-pembelian');
 
     // kirim data pembelian ke server
     Route::post('/send-penjualan', [ScheduleController::class, 'sendPenjualan'])->name('send-penjualan');

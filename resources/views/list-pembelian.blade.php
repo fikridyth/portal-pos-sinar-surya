@@ -45,7 +45,7 @@
                                     <td class="text-center text-black">{{ $penjualan->created_by }}</td>
                                     <td class="text-center text-black">{{ $penjualan->no }}</td>
                                     <td class="text-center text-black">{{ $penjualan->jam }}</td>
-                                    <td class="text-center text-black"><input type="checkbox" class="preorder-checkbox" data-detail="{{ json_encode($penjualan->detail) }}"></td>
+                                    <td class="text-center text-black"><input type="checkbox" class="preorder-checkbox" data-total="{{ $penjualan->grand_total }}" data-detail="{{ json_encode($penjualan->detail) }}"></td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -54,7 +54,7 @@
             </div>
 
             <div class="form-group col-8">
-                <div style="overflow-x: auto; height: 600px; border: 1px solid #ccc; background-color: white;">
+                <div style="overflow-x: auto; height: 560px; border: 1px solid #ccc; background-color: white;">
                     <table class="table table-bordered" style="width: 100%; table-layout: auto;">
                         <thead>
                             <tr>
@@ -66,6 +66,16 @@
                             </tr>
                         </thead>
                         <tbody id="orderDetailTableBody">
+                        </tbody>
+                    </table>
+                </div>
+                <div style="height: 40px; border: 1px solid #ccc; margin-top: 0;">
+                    <table class="table table-bordered" style="width: 100%; table-layout: auto;">
+                        <tbody>
+                            <tr>
+                                <th colspan="3" class="text-end" style="width: 75%;">TOTAL</th>
+                                <th class="text-end value-total" style="width: 25%;">0</th>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -84,7 +94,9 @@
         document.querySelectorAll('.preorder-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const detail = JSON.parse(this.getAttribute('data-detail'));
+                const grandTotal = JSON.parse(this.getAttribute('data-total'));
                 const tbody = document.getElementById('orderDetailTableBody');
+                const totalCell = document.querySelector('.table tbody tr th.value-total');
                 
                 if (this.checked) {
                     document.querySelectorAll('.preorder-checkbox').forEach(otherCheckbox => {
@@ -93,7 +105,7 @@
                         }
                     });
 
-                    tbody.innerHTML = ''; // Clear existing rows before adding new ones
+                    tbody.innerHTML = '';
                     JSON.parse(detail).forEach(item => {
                         // console.log(item);
                         const newRow = document.createElement('tr');
@@ -107,6 +119,7 @@
                         tbody.appendChild(newRow);
                     });
 
+                    totalCell.textContent = number_format(grandTotal);
                     const currentCheckbox = this;
                     const currentDetail = detail;
 
@@ -116,7 +129,7 @@
                             const id = currentCheckbox.closest('tr').dataset.id;
 
                             // AJAX request to your server
-                            fetch('/print-pembelian', {
+                            fetch('/reprint-pembelian', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -136,7 +149,8 @@
                         otherCheckbox.disabled = false;
                     });
 
-                    tbody.innerHTML = ''; // Clear the table if checkbox is unchecked
+                    tbody.innerHTML = '';
+                    totalCell.textContent = '0';
                 }
             });
 
