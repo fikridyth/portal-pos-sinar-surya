@@ -3,24 +3,32 @@
 @section('styles')
     <style>
         .modal-password {
-            display: none; 
-            position: fixed; 
-            z-index: 1; 
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgb(0,0,0);
-            background-color: rgba(0,0,0,0.4); 
+            position: fixed;
+            bottom: 30px;
+            right: 0;
+            width: 300px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            z-index: 1000;
         }
 
         .modal-content-password {
-            background-color: #fefefe;
-            margin: 15% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 15%; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        h5 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+        }
+
+        #passwordInput {
+            padding: 8px;
+            font-size: 14px;
+            width: 100%;
+            margin-top: 10px;
         }
     </style>
 @endsection
@@ -39,13 +47,6 @@
                 <input type="text" id="barcodeInput" autocomplete="off" style="width: 1px; opacity: 0;" autofocus>
                 <input type="text" id="barcodeInputVoid" autocomplete="off" style="width: 1px; opacity: 0;">
                 <input type="text" id="barcodeInputReturn" autocomplete="off" style="width: 1px; opacity: 0;">
-
-                <div id="passwordModal" class="modal-password" style="display:none;">
-                    <div class="modal-content-password">
-                        <h5>MASUKAN PASSWORD</h5>
-                        <input type="password" id="passwordInput"/>
-                    </div>
-                </div>
             </div>
             <table class="table">
                 <thead>
@@ -98,6 +99,14 @@
                     </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    {{-- pass modal --}}
+    <div id="passwordModal" class="modal-password" style="display:none;">
+        <div class="modal-content-password">
+            <h5>MASUKAN PASSWORD</h5>
+            <input type="password" id="passwordInput"/>
         </div>
     </div>
 
@@ -181,53 +190,111 @@
                         const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
                         const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder.value : inputOrder.value;
 
-                        const newRow = document.createElement('tr');
-                        newRow.innerHTML = `
-                            <td class="text-center" style="width: 75px;">${scanLabel}</td>
-                            <td class="text-center" style="width: 200px;">${kode}</td>
-                            <td>${data.product.nama}/${data.product.unit_jual}</td>
-                            <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
-                            <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
-                            <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
-                            <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
-                        `;
-                        const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
-                        if (lastInsertedRow) {
-                            topTbody.insertBefore(newRow, lastInsertedRow);
+                        if (scanLabel == 'VOD') {
+                            let kodeDitemukan = productDetails.some((data) => data.kode === kode);
+                            if (!kodeDitemukan) {
+                                alert('DATA TIDAK DITEMUKAN!');
+                            } else {
+                                const newRow = document.createElement('tr');
+                                newRow.innerHTML = `
+                                    <td class="text-center" style="width: 75px;">${scanLabel}</td>
+                                    <td class="text-center" style="width: 200px;">${kode}</td>
+                                    <td>${data.product.nama}/${data.product.unit_jual}</td>
+                                    <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
+                                    <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
+                                    <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
+                                    <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
+                                `;
+                                const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+                                if (lastInsertedRow) {
+                                    topTbody.insertBefore(newRow, lastInsertedRow);
+                                } else {
+                                    topTbody.insertBefore(newRow, staticRow);
+                                }
+                                
+                                // update total harga
+                                grandTotal += displayHarga * inputOrder.value;
+                                grandDiskon += 0;
+                                grandTotalDiskon += displayHarga * inputOrder.value;
+                                document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
+                                document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
+                                document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
+                                document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
+
+                                productDetails.push({
+                                    label: scanLabel,
+                                    kode: data.product.kode,
+                                    kode_alternatif: data.product.kode_alternatif,
+                                    nama: data.product.nama + '/' + data.product.unit_jual,
+                                    harga: displayHarga,
+                                    order: displayOrder,
+                                    total: inputOrder.value * displayHarga,
+                                    diskon: 0,
+                                    grand_total: displayHarga - 0
+                                });
+                                
+                                // Add the event listener in input
+                                document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
+                                barcodeValues.length = 0;
+                                document.getElementById("input-text").innerHTML = 1;
+                                document.getElementById("input-order").value = 1;
+                                document.getElementById('barcodeInput').focus();
+                            }
                         } else {
-                            topTbody.insertBefore(newRow, staticRow);
+                            const newRow = document.createElement('tr');
+                            newRow.innerHTML = `
+                                <td class="text-center" style="width: 75px;">${scanLabel}</td>
+                                <td class="text-center" style="width: 200px;">${kode}</td>
+                                <td>${data.product.nama}/${data.product.unit_jual}</td>
+                                <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
+                                <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
+                                <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
+                                <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
+                            `;
+                            const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+                            if (lastInsertedRow) {
+                                topTbody.insertBefore(newRow, lastInsertedRow);
+                            } else {
+                                topTbody.insertBefore(newRow, staticRow);
+                            }
+                            
+                            // update total harga
+                            grandTotal += displayHarga * inputOrder.value;
+                            grandDiskon += 0;
+                            grandTotalDiskon += displayHarga * inputOrder.value;
+                            document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
+                            document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
+                            document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
+                            document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
+
+                            productDetails.push({
+                                label: scanLabel,
+                                kode: data.product.kode,
+                                kode_alternatif: data.product.kode_alternatif,
+                                nama: data.product.nama + '/' + data.product.unit_jual,
+                                harga: displayHarga,
+                                order: displayOrder,
+                                total: inputOrder.value * displayHarga,
+                                diskon: 0,
+                                grand_total: displayHarga - 0
+                            });
+                            
+                            // Add the event listener in input
+                            document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
+                            barcodeValues.length = 0;
+                            document.getElementById("input-text").innerHTML = 1;
+                            document.getElementById("input-order").value = 1;
+                            document.getElementById('barcodeInput').focus();
                         }
-
-                        // update total harga
-                        grandTotal += displayHarga * inputOrder.value;
-                        grandDiskon += 0;
-                        grandTotalDiskon += displayHarga * inputOrder.value;
-                        document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
-                        document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
-                        document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
-                        document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
-
-                        productDetails.push({
-                            label: scanLabel,
-                            kode: data.product.kode,
-                            kode_alternatif: data.product.kode_alternatif,
-                            nama: data.product.nama + '/' + data.product.unit_jual,
-                            harga: displayHarga,
-                            order: displayOrder,
-                            total: inputOrder.value * displayHarga,
-                            diskon: 0,
-                            grand_total: displayHarga - 0
-                        });
                         
-                        // Add the event listener in input
-                        document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
-                        barcodeValues.length = 0;
-                        document.getElementById("input-text").innerHTML = 1;
-                        document.getElementById("input-order").value = 1;
-                        document.getElementById('barcodeInput').focus();
+                        if (scanLabel == 'RTN') {
+                            document.getElementById('label-cell').innerText = scanLabel;
+                        } else {
+                            document.getElementById('label-cell').innerText = 'PLU';
+                        }
                     }
                 });
-        }
+            }
     // implementasi barcode
 
     // add otoritas, implementasi klik yang menggunakan otoritas
@@ -254,7 +321,7 @@
                     document.getElementById('label-cell').innerText = 'VOD';
                     document.getElementById('barcodeInputVoid').focus();
                     closePasswordModal();
-                } else if (passwordInput.dataset.action === 'F6' && password === saPassword) {
+                } else if (passwordInput.dataset.action === 'F6' && password === saPassword && document.getElementById('label-cell').innerText == 'PLU') {
                     document.getElementById('label-cell').innerText = 'RTN';
                     document.getElementById('barcodeInputReturn').focus();
                     closePasswordModal();
@@ -324,7 +391,7 @@
                 } else if ((passwordInput.dataset.action === '=' || passwordInput.dataset.action === '+') && password === saPassword) {
                     // console.log(topTbody.innerHTML)
                     // Ambil semua elemen <tr> yang memiliki <td> dengan ID input-diskon
-                        const rowsWithDiskon = topTbody.querySelectorAll('tr td#input-diskon');
+                    const rowsWithDiskon = topTbody.querySelectorAll('tr td#input-diskon');
                     const lastInputDiskonTd = rowsWithDiskon.length > 1 ? rowsWithDiskon[rowsWithDiskon.length - 2] : null;
                     const rowsWithTotal = topTbody.querySelectorAll('tr td#value-total');
                     const lastInputTotalTd = rowsWithTotal.length > 1 ? rowsWithTotal[rowsWithTotal.length - 2] : null;
@@ -412,6 +479,25 @@
                         localStorage.removeItem('grandTotalDiskon');
                     });
                     location.reload();
+                } else if ((passwordInput.dataset.action === 'v' || passwordInput.dataset.action === 'V') && password === saPassword) {
+                    event.preventDefault();
+                    // transfer penjualan ke server
+                    fetch('/send-penjualan', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content'), // if using CSRF protection
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            closePasswordModal();
+                            alert(data.message); // Handle success message
+                        })
+                        .catch(error => {
+                            console.error('Error:', error); // Handle error
+                        });
                 } else {
                     alert("Password salah. Silakan coba lagi.");
                     passwordInput.value = '';
@@ -424,7 +510,7 @@
 
         function handleDefaultVisibility(event) {
             if (event.key === 'Enter' || event.key === 'Escape') {
-                document.getElementById('label-cell').innerText = 'PLU';
+                // document.getElementById('label-cell').innerText = 'PLU';
                 document.getElementById('input-text').innerHTML = document.getElementById('input-order').value;
                 if (document.getElementById('input-order').value === '' || document.getElementById('input-order').value == 0) {
                     document.getElementById('input-order').value = 1;
@@ -477,6 +563,14 @@
                 event.preventDefault();
                 passwordInput.value = '';
                 handlePasswordModal('F5');
+            } else if (event.key === 'v') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('v');
+            } else if (event.key === 'V') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('V');
             }
         }
 
@@ -510,6 +604,7 @@
             // make table
             const topTbody = document.querySelector('tbody.top');
             const staticRow = topTbody.querySelector('tr:first-child');
+
             productDetails.forEach((data, index) => {
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
@@ -522,6 +617,11 @@
                     <td class="text-end" style="width: 175px;" id="value-total">${number_format(data.grand_total)}</td>
                 `;
                 topTbody.insertBefore(newRow, staticRow);
+                if (data.label == 'RTN') {
+                    document.getElementById('label-cell').innerText = data.label;
+                } else {
+                    document.getElementById('label-cell').innerText = 'PLU';
+                }
             });
 
             // update table
@@ -563,6 +663,14 @@
                 });
             }
 
+            if (document.getElementById('label-cell').innerText == 'RTN') {
+                if (event.key === 'F6') {
+                    event.preventDefault();
+                    document.getElementById('label-cell').innerText = 'PLU';
+                    closePasswordModal();
+                }
+            }
+
             // search product - menggunakan local storage untuk menyimpan data sementara
             if (event.key === 'F11') {
                 event.preventDefault();
@@ -579,25 +687,6 @@
             if (event.key === '?' || event.key === '/') {
                 event.preventDefault();
                 submitData();
-            }
-
-            // transfer penjualan ke server
-            if (event.key === 'v' || event.key === 'V') {
-                fetch('/send-penjualan', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                                'content'), // if using CSRF protection
-                        },
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        alert(data.message); // Handle success message
-                    })
-                    .catch(error => {
-                        console.error('Error:', error); // Handle error
-                    });
             }
 
             // buat fungsi untuk store hold
@@ -632,13 +721,8 @@
             // kembali ke pembayaran
             if (event.key === '>' || event.key === '.') {
                 event.preventDefault();
-                window.addEventListener('beforeunload', function() {
-                    localStorage.removeItem('productDetails');
-                    localStorage.removeItem('grandTotal');
-                    localStorage.removeItem('grandDiskon');
-                    localStorage.removeItem('grandTotalDiskon');
-                });
-                window.location.href = '/dashboard';
+                document.getElementById('label-cell').innerText = 'PLU';
+                closePasswordModal();
             }
 
             // reload

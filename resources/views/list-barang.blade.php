@@ -73,20 +73,42 @@
                     const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
                     const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder : inputOrder;
 
-                    const newProductDetails = {
-                        label: scanLabel,
-                        kode: link.getAttribute('data-kode'),
-                        kode_alternatif: link.getAttribute('data-kode-alternatif'),
-                        nama: link.getAttribute('data-nama') + '/' + link.getAttribute('data-unit-jual'),
-                        harga: displayHarga,
-                        order: displayOrder,
-                        total: displayHarga * inputOrder,
-                        diskon: 0,
-                        grand_total: displayHarga * inputOrder
-                    };
-                    productDetails.push(newProductDetails);
-                    grandTotal += Number(displayHarga * inputOrder);
-                    grandTotalDiskon += Number(displayHarga * inputOrder);
+                    if (scanLabel == 'VOD') {
+                        let kodeDitemukan = productDetails.some((data) => data.kode === link.getAttribute('data-kode'));
+                        if (!kodeDitemukan) {
+                            alert('DATA TIDAK DITEMUKAN!');
+                        } else {
+                            const newProductDetails = {
+                                label: scanLabel,
+                                kode: link.getAttribute('data-kode'),
+                                kode_alternatif: link.getAttribute('data-kode-alternatif'),
+                                nama: link.getAttribute('data-nama') + '/' + link.getAttribute('data-unit-jual'),
+                                harga: displayHarga,
+                                order: displayOrder,
+                                total: displayHarga * inputOrder,
+                                diskon: 0,
+                                grand_total: displayHarga * inputOrder
+                            };
+                            productDetails.push(newProductDetails);
+                            grandTotal += Number(displayHarga * inputOrder);
+                            grandTotalDiskon += Number(displayHarga * inputOrder);
+                        }
+                    } else {
+                        const newProductDetails = {
+                            label: scanLabel,
+                            kode: link.getAttribute('data-kode'),
+                            kode_alternatif: link.getAttribute('data-kode-alternatif'),
+                            nama: link.getAttribute('data-nama') + '/' + link.getAttribute('data-unit-jual'),
+                            harga: displayHarga,
+                            order: displayOrder,
+                            total: displayHarga * inputOrder,
+                            diskon: 0,
+                            grand_total: displayHarga * inputOrder
+                        };
+                        productDetails.push(newProductDetails);
+                        grandTotal += Number(displayHarga * inputOrder);
+                        grandTotalDiskon += Number(displayHarga * inputOrder);
+                    }
 
                     // Store product details in localStorage
                     localStorage.setItem('productDetails', JSON.stringify(productDetails));
