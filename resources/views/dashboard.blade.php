@@ -79,8 +79,12 @@
                 </tbody>
                 <tbody class="bottom">
                     <tr>
-                        <td class="text-end" id="big-total" colspan="5" style="font-size: 56px;">0</td>
-                        <td class="text-end" colspan="2">
+                        <td class="text-end align-items-center" id="input-barcode" colspan="4" style="font-size: 48px; width: 58%">
+                            <input type="text" id="barcode-input" style="display: none; font-size: 40px; width: 100%; background-color: black; color: white; border: 2px solid white; padding: 10px;" 
+                            autocomplete="off" oninput="checkInput()" onkeydown="handleKeyDown(event)" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                        </td>
+                        <td class="text-end align-items-center" id="big-total" colspan="1" style="font-size: 48px;">0</td>
+                        <td class="text-end" colspan="2" style=" width: 18%">
                             <div class="d-flex justify-content-between">
                                 <div>JUMLAH</div>
                                 <div id="small-jumlah">0</div>
@@ -635,14 +639,46 @@
 
     // implementasi klik yang tidak menggunakan otoritas
         document.addEventListener('keydown', function(event) {
-            // focus on input qty
-            if (event.key === 'Tab') {
-                event.preventDefault();
-                document.getElementById('input-text').hidden = true;
-                document.getElementById('input-order').hidden = false;
-                document.getElementById('input-order').value = '';
-                document.getElementById('input-order').focus();
+            const input = document.getElementById("barcode-input");
+            const inputCode = document.getElementById("barcodeInput");
+            
+            // input barcode
+            if (event.key >= '0' && event.key <= '9') {
+                // Tampilkan input jika belum terlihat
+                if (input.style.display === "none") {
+                    input.style.display = "block";
+                }
+
+                // Fokuskan input
+                input.focus();
             }
+            
+            if (event.key.toLowerCase() === 'x') {
+                // Isi value input ke dalam elemen #input-text
+                const inputValue = input.value; // Ambil nilai yang ada di input
+                document.getElementById('input-text').innerHTML = inputValue; // Set value ke elemen input-text
+                document.getElementById('input-order').value = inputValue;
+
+                // Setelah itu, sembunyikan input dan reset nilainya
+                input.style.display = "none";
+                input.value = ''; // Reset input
+            }
+
+            if (event.key === 'Escape') {
+                // Hapus nilai input dan sembunyikan input
+                input.value = '';
+                input.style.display = "none";
+                inputCode.focus();
+            }
+
+            // focus on input qty
+            // if (event.key === 'Tab') {
+            //     event.preventDefault();
+            //     document.getElementById('input-text').hidden = true;
+            //     document.getElementById('input-order').hidden = false;
+            //     document.getElementById('input-order').value = '';
+            //     document.getElementById('input-order').focus();
+            // }
 
             // lihat list tombol
             if (event.key === 't' || event.key === 'T') {
@@ -748,6 +784,98 @@
                 window.location.href = '/logout';
             }
         });
+
+        // tampilkan input bila ada data
+        function checkInput() {
+            const input = document.getElementById("barcode-input");
+            const barcode = input.value;
+            
+            // Jika ada input, tetap tampilkan input, jika tidak sembunyikan
+            if (barcode.length > 0) {
+                input.style.display = "block";
+            } else {
+                input.style.display = "none";
+            }
+        }
+
+        // Fungsi untuk menangani event ketika tombol ditekan
+        function handleKeyDown(event) {
+            const input = document.getElementById("barcode-input");
+            const barcode = input.value;
+
+            // Jika tombol 'Enter' ditekan dan ada nilai pada input
+            if (event.key === 'Enter' && barcode.length > 0) {
+                event.preventDefault();  // Mencegah form submit (jika berada dalam form)
+
+                // Panggil route untuk mendapatkan data produk berdasarkan barcode
+                fetch(`/get-detail-products/${barcode}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        document.getElementById('barcode-input').focus();
+                    } else {
+                        const topTbody = document.querySelector('tbody.top');
+                        const staticRow = topTbody.querySelector('tr:first-child');
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td class="text-center" style="width: 75px;">PLU</td>
+                            <td class="text-center" style="width: 200px;">${data.product.kode}</td>
+                            <td>${data.product.nama}/${data.product.unit_jual}</td>
+                            <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
+                            <td class="text-end" style="width: 175px;">${number_format(data.product.harga_jual)}</td>
+                            <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
+                            <td class="text-end" id="value-total" style="width: 175px;">${number_format(data.product.harga_jual * inputOrder.value)}</td>
+                        `;
+                        const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+                        if (lastInsertedRow) {
+                            topTbody.insertBefore(newRow, lastInsertedRow);
+                        } else {
+                            topTbody.insertBefore(newRow, staticRow);
+                        }
+                        
+                        // update total harga
+                        grandTotal += data.product.harga_jual * inputOrder.value;
+                        grandDiskon += 0;
+                        grandTotalDiskon += data.product.harga_jual * inputOrder.value;
+                        document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
+                        document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
+                        document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
+                        document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
+
+                        productDetails.push({
+                            label: 'PLU',
+                            kode: data.product.kode,
+                            kode_alternatif: data.product.kode_alternatif,
+                            nama: data.product.nama + '/' + data.product.unit_jual,
+                            harga: data.product.harga_jual,
+                            order: inputOrder.value,
+                            total: inputOrder.value * data.product.harga_jual,
+                            diskon: 0,
+                            grand_total: data.product.harga_jual
+                        });
+                        
+                        // Add the event listener in input
+                        document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
+                        barcodeValues.length = 0;
+                        document.getElementById("input-text").innerHTML = 1;
+                        document.getElementById("input-order").value = 1;
+
+                        document.getElementById('barcodeInput').focus();
+                        input.value = '';
+                        input.style.display = "none";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching product data:', error);
+                });
+            }
+        }
     // implementasi klik yang tidak menggunakan otoritas
 
     // store data ke tabel penjualan

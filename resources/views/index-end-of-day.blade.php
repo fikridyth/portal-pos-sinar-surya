@@ -46,7 +46,7 @@
             <div class="d-flex justify-content-center">
                 <div class="d-flex justify-content-center mb-2 p-2"
                     style="color: white; border: 2px solid white; border-bottom: none; margin-top: 25px; background-color: gray; width: 40%;">
-                    <div class="d-flex justify-content-center" style="overflow-x: auto; height: 155px; border: 1px solid #ccc; background-color: white;">
+                    {{-- <div class="d-flex justify-content-center" style="overflow-x: auto; height: 155px; border: 1px solid #ccc; background-color: white;">
                         <table class="table table-bordered" style="width: 100%; table-layout: auto;">
                             <thead>
                                 <tr>
@@ -69,14 +69,14 @@
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
             <div class="d-flex justify-content-center">
                 <div class="d-flex justify-content-center align-items-center mt-n2 p-2"
                     style="color: white; border: 2px solid white; border-top: none; background-color: gray; width: 40%;">
-                    <div>
-                        <button class="btn btn-dark mx-2" style="width: 200px;">PROSES</button>
+                    <div class="mb-3">
+                        <button id="process-button" class="btn btn-dark mx-2" style="width: 200px;">PROSES</button>
                         <a href="/" class="btn btn-dark mx-2" style="width: 200px;">SELESAI</a>
                     </div>
                 </div>
@@ -86,7 +86,7 @@
                 <h5 class="mx-2">POS NO <input class="mx-2" type="text" size="5" readonly value="01"></h5>
                 <h5 class="mx-2">KASIR <input class="mx-2" type="text" size="20" readonly value="{{ auth()->user()->name }}"></h5>
                 {{-- <h5 class="mx-2">DATA <input class="mx-2" type="text" size="5" value="0"></h5> --}}
-                <button class="btn btn-sm btn-dark" style="width: 150px;">KOREKSI</button>
+                {{-- <button class="btn btn-sm btn-dark" style="width: 150px;">KOREKSI</button> --}}
             </div>
         </div>
     </div>
@@ -94,6 +94,26 @@
 
 @section('scripts')
     <script>
+        // end-of-day
+        document.getElementById('process-button').addEventListener('click', function() {
+            fetch('/process-end-of-day', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'), // if using CSRF protection
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message); // Handle success message
+                    window.location.href = '/';
+                })
+                .catch(error => {
+                    console.error('Error:', error); // Handle error
+                });
+        });
+
         document.addEventListener('keydown', function(event) {
             if (event.key === 'F2') {
                 event.preventDefault();

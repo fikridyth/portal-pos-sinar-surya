@@ -71,4 +71,5 @@ Route::middleware('auth')->group(function () {
     // end of day
     Route::get('/end-of-day', [HomeController::class, 'endOfDay'])->name('end-of-day');
     Route::get('/index-end-of-day', [HomeController::class, 'indexEndOfDay'])->name('index-end-of-day');
+    Route::post('/process-end-of-day', [ScheduleController::class, 'endOfDay'])->name('process-end-of-day');
 });
