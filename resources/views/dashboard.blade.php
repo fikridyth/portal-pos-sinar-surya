@@ -995,11 +995,14 @@
 
     // store data ke tabel penjualan
         function submitData() {
+            const inputSubmit = document.getElementById('barcode-input').value;
             const detail = JSON.stringify({
                 products: productDetails,
                 grandTotal: grandTotal,
-                grandDiskon: grandDiskon
+                grandDiskon: grandDiskon,
+                payment: inputSubmit,
             });
+
             fetch('{{ route('penjualan.store') }}', {
                     method: 'POST',
                     headers: {
@@ -1038,6 +1041,7 @@
                         `;
                         topTbody.insertBefore(newRow2, lastInsertedRow);
                         topTbody.insertBefore(newRow, lastInsertedRow);
+                        document.getElementById('big-total').innerHTML = number_format(data.penjualan.return);
 
                         printReceipt(data.printData);
 

@@ -47,6 +47,7 @@ class HomeController extends Controller
 
     public function storePenjualan(Request $request)
     {
+        // dd($request->all());
         $products = $request->input('products');
 
         $sequence = '000001';
@@ -69,13 +70,16 @@ class HomeController extends Controller
         }
         $getNomor = str_pad($sequence, 6, 0, STR_PAD_LEFT);
 
+        $valueGrandTotal = $request->grandTotal - $request->grandDiskon;
         $dataPenjualan = [
             'tanggal' => Carbon::now()->setTimezone('Asia/Jakarta')->format('Y-m-d'),
             'jam' => Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i:s'),
             'detail' => json_encode($products),
             'total' => $request->grandTotal,
             'diskon' => $request->grandDiskon,
-            'grand_total' => $request->grandTotal - $request->grandDiskon,
+            'grand_total' => $valueGrandTotal,
+            'payment' => $request->payment ?? 0,
+            'return' => $request->payment ? $request->payment - $valueGrandTotal : $valueGrandTotal,
             'no' => $getNomor,
             'created_by' => auth()->user()->name
         ];
@@ -196,6 +200,21 @@ class HomeController extends Controller
         $output .= "<span>TOTAL</span>";
         $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
         $output .= "</div>";
+        if ($penjualan['payment'] !== 0) {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>TENDER 01</span>";
+            $output .= "<span>" . number_format($penjualan['payment'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>KEMBALI</span>";
+            $output .= "<span>" . number_format($penjualan['return'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+        } else {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>TENDER 01</span>";
+            $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+        }
         $output .= "<div class='product-item'>";
         $output .= "<span class='total'>" . auth()->user()->name . "</span>";
         $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
@@ -313,6 +332,21 @@ class HomeController extends Controller
         $output .= "<span>TOTAL</span>";
         $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
         $output .= "</div>";
+        if ($penjualan['payment'] !== 0) {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>TENDER 01</span>";
+            $output .= "<span>" . number_format($penjualan['payment'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>KEMBALI</span>";
+            $output .= "<span>" . number_format($penjualan['return'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+        } else {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>TENDER 01</span>";
+            $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+        }
         $output .= "<div class='product-item'>";
         $output .= "<span class='total'>" . auth()->user()->name . "</span>";
         $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
