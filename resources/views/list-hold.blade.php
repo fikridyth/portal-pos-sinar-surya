@@ -84,7 +84,7 @@
     </div>
     
     <div class="text-center mt-2">
-        <button type="button" onclick="window.history.back()" class="btn btn-danger mt-3 mx-3">C = PILIH</button>
+        <a href="#" id="linkPilih" class="btn btn-danger mt-3 mx-3">C = PILIH</a>
         <button type="button" onclick="window.history.back()" class="btn btn-danger mt-3 mx-3">F9 = KEMBALI</button>
     </div>
 @endsection
@@ -126,6 +126,8 @@
                             window.location.href = `/index-hold/${id}`;
                         }
                     });
+
+                    document.getElementById('linkPilih').setAttribute('href', `/index-hold/${id}`);
                 } else {
                     document.querySelectorAll('.preorder-checkbox').forEach(otherCheckbox => {
                         otherCheckbox.disabled = false;
