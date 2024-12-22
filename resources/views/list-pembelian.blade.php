@@ -112,9 +112,9 @@
                         newRow.innerHTML = `
                             <td class="text-black">${item.nama}</td>
                             <td class="text-end text-black" style="width: 100px;">${Math.abs(item.order)}</td>
-                            <td class="text-end text-black" style="width: 100px;">${number_format(item.harga)}</td>
-                            <td class="text-end text-black" style="width: 100px;">${number_format(item.diskon)}</td>
                             <td class="text-end text-black" style="width: 100px;">${number_format(item.total)}</td>
+                            <td class="text-end text-black" style="width: 100px;">${number_format(item.diskon)}</td>
+                            <td class="text-end text-black" style="width: 100px;">${number_format(item.grand_total)}</td>
                         `;
                         tbody.appendChild(newRow);
                     });

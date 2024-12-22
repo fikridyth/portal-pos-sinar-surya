@@ -41,6 +41,9 @@
         -moz-appearance: textfield; /* Firefox */
         }
     </style>
+
+    {{-- include modal style --}}
+    @include('modal-style')
 @endsection
 
 @section('content')
@@ -375,6 +378,7 @@
                         lastInputDiskonTd.appendChild(diskonInput);
                         diskonInput.focus(); // Autofocus pada input
                         closePasswordModal();
+                        isPasswordModalOpen = true;
 
                         let previousDiskonValue = productDetails[rowIndex].diskon || 0;
                         diskonInput.addEventListener('keydown', function(event) {
@@ -403,11 +407,13 @@
                                 
                                 lastInputDiskonTd.innerHTML = number_format(calculatedDiskon);
                                 lastInputTotalTd.innerHTML = number_format(productDetails[rowIndex].grand_total);
+                                isPasswordModalOpen = false;
                             }
                         });
                     } else {
                         alert("Tidak ada data yang dirubah.");
                         passwordInput.value = '';
+                        closePasswordModal();
                     }
                 } else if ((passwordInput.dataset.action === '=' || passwordInput.dataset.action === '+') && password === saPassword) {
                     // console.log(topTbody.innerHTML)
@@ -438,6 +444,7 @@
                         lastInputDiskonTd.appendChild(diskonInput);
                         diskonInput.focus(); // Autofocus pada input
                         closePasswordModal();
+                        isPasswordModalOpen = true;
 
                         let previousDiskonValue = productDetails[rowIndex].diskon || 0;
                         diskonInput.addEventListener('keydown', function(event) {
@@ -458,11 +465,13 @@
                                 
                                 lastInputDiskonTd.innerHTML = number_format(diskonValue);
                                 lastInputTotalTd.innerHTML = number_format(productDetails[rowIndex].grand_total);
+                                isPasswordModalOpen = false;
                             }
                         });
                     } else {
                         alert("Tidak ada data yang dirubah.");
                         passwordInput.value = '';
+                        closePasswordModal();
                     }
                 } else if (passwordInput.dataset.action === 'F7' && password === saPassword) {
                     event.preventDefault();
@@ -1128,4 +1137,7 @@
         }
     // number format
     </script>
+
+    {{-- include script modal --}}
+    @include('modal-script')
 @endsection
