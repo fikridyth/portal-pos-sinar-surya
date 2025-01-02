@@ -46,11 +46,12 @@ class ProductDataTable extends DataTable
             return number_format($row->harga_pokok);
         })
         ->editColumn('harga_jual', function ($row) {
-            if (isset($row->harga_sementara) && ($row->tanggal_awal <= now()->format('Y-m-d') && $row->tanggal_akhir >= now()->format('Y-m-d'))) {
-                return number_format($row->harga_sementara);
-            } else {
-                return number_format($row->harga_jual);
-            }
+            return number_format($row->harga_jual);
+            // if (isset($row->harga_sementara) && ($row->tanggal_awal <= now()->format('Y-m-d') && $row->tanggal_akhir >= now()->format('Y-m-d'))) {
+            //     return number_format($row->harga_sementara);
+            // } else {
+            //     return number_format($row->harga_jual);
+            // }
         })
         ->rawColumns(['nama']);
     }
