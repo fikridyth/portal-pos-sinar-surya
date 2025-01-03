@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DataTables\ProductDataTable;
 use App\DataTables\SupplierDataTable;
+use App\Models\HargaSementara;
 use App\Models\Hold;
 use App\Models\Penjualan;
 use App\Models\Product;
@@ -23,7 +24,10 @@ class HomeController extends Controller
         $saPass = User::where('name', 'LO HARYANTO')->pluck('show_password')->first();
         $myPass = auth()->user()->show_password;
 
-        return view('dashboard', compact('title', 'saPass', 'myPass'));
+        $now = now()->format('Y-m-d');
+        $hargaSementara = HargaSementara::where('date_first', '>=' ,$now)->orderBy('date_first', 'asc')->get();
+
+        return view('dashboard', compact('title', 'saPass', 'myPass', 'now', 'hargaSementara'));
     }
 
     // pembelian

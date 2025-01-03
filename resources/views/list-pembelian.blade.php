@@ -84,7 +84,8 @@
     </div>
     
     <div class="text-center mt-2">
-        <button type="button" onclick="window.history.back()" class="btn btn-danger mt-3 mx-3">C = CETAK</button>
+        {{-- <button type="button" onclick="window.history.back()" class="btn btn-danger mt-3 mx-3">C = CETAK</button> --}}
+        <a href="#" id="linkPilih" class="btn btn-danger mt-3 mx-3">C = CETAK</a>
         <button type="button" onclick="window.history.back()" class="btn btn-danger mt-3 mx-3">R = KEMBALI</button>
     </div>
 @endsection
@@ -144,6 +145,26 @@
                             .catch(error => console.error('Error:', error));
                         }
                     }, { once: true });
+
+                    document.getElementById('linkPilih').addEventListener('click', function(event) {
+                        event.preventDefault(); // Prevent default action of the link
+                        const id = currentCheckbox.closest('tr').dataset.id;
+
+                        // AJAX request to your server
+                        fetch('/reprint-pembelian', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
+                            },
+                            body: JSON.stringify({ id: id, detail: currentDetail })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            printReceipt(data.printData); // Assuming this function exists to handle printing the receipt
+                        })
+                        .catch(error => console.error('Error:', error));
+                    });
                 } else {
                     document.querySelectorAll('.preorder-checkbox').forEach(otherCheckbox => {
                         otherCheckbox.disabled = false;

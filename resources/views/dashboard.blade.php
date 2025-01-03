@@ -860,15 +860,19 @@
                         document.getElementById('barcode-input').focus();
                     } else {
                         const kode = document.getElementById('barcode-input').value;
+
                         // cek bila ada harga sementara
-                        const now = new Date();
-                        const currentDate = now.toISOString().split('T')[0];
                         let hargaJual = data.product.harga_jual;
-                        // if (data.product.harga_sementara && (data.product.tanggal_awal <= currentDate && data.product.tanggal_akhir >= currentDate)) {
-                        //     hargaJual = data.product.harga_sementara;
-                        // } else {
-                        //     hargaJual = data.product.harga_jual;
-                        // }
+                        var dateNow = @json($now);
+                        var hargaSementara = @json($hargaSementara);
+                        var hargaPertama = hargaSementara.find(function(harga) {
+                            return data.product.id == harga.id_product;
+                        });
+                        if (hargaPertama) {
+                            if (hargaPertama.date_first == dateNow) {
+                                hargaJual = hargaPertama.harga_sementara;
+                            }
+                        }
 
                         const scanLabel = document.getElementById('label-cell').innerHTML;
                         const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
@@ -889,6 +893,7 @@
                                 document.getElementById("input-text").innerHTML = 1;
                                 document.getElementById("input-order").value = 1;
                                 document.getElementById('barcode-input').value = '';
+                                document.getElementById('label-cell').innerText = 'VOD';
                             } else if (kodeDitemukan && !jumlahKurang) {
                                 alert('JUMLAH TIDAK BOLEH LEBIH BANYAK DARI DATA!');
                                 
@@ -896,6 +901,7 @@
                                 document.getElementById("input-text").innerHTML = 1;
                                 document.getElementById("input-order").value = 1;
                                 document.getElementById('barcode-input').value = '';
+                                document.getElementById('label-cell').innerText = 'VOD';
                             } else {
                                 const newRow = document.createElement('tr');
                                 newRow.innerHTML = `
@@ -932,7 +938,7 @@
                                     order: displayOrder,
                                     total: inputOrder.value * displayHarga,
                                     diskon: 0,
-                                    grand_total: displayHarga - 0
+                                    grand_total: inputOrder.value * displayHarga
                                 });
                                 
                                 // Add the event listener in input
@@ -941,6 +947,7 @@
                                 document.getElementById("input-text").innerHTML = 1;
                                 document.getElementById("input-order").value = 1;
                                 document.getElementById('barcode-input').value = '';
+                                document.getElementById('label-cell').innerText = 'PLU';
                             }
                         } else {
                             const newRow = document.createElement('tr');
@@ -978,7 +985,7 @@
                                 order: displayOrder,
                                 total: inputOrder.value * displayHarga,
                                 diskon: 0,
-                                grand_total: displayHarga - 0
+                                grand_total: inputOrder.value * displayHarga
                             });
                             
                             // Add the event listener in input
@@ -993,10 +1000,6 @@
                             document.getElementById('label-cell').innerText = scanLabel;
                             document.getElementById('barcode-input').value = '';
                             document.getElementById('barcodeInputReturn').focus();
-                        } else {
-                            document.getElementById('label-cell').innerText = 'PLU';
-                            document.getElementById('barcode-input').value = '';
-                            document.getElementById('barcodeInput').focus();
                         }
                     }
                 })
