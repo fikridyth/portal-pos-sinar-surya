@@ -189,6 +189,7 @@ class HomeController extends Controller
             $output .= "<span>{$product['nama']}</span>";
             if ($product['order'] == 1) {
                 $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+                
             }
             $output .= "</div>";
             if ($product['order'] > 1) {
@@ -432,35 +433,43 @@ class HomeController extends Controller
 
     public function indexSupplier($id)
     {
+        $id = dekrip($id);
         $title = 'Kembali Barang';
         $supplier = Supplier::find($id);
 
-        return view('index-supplier', compact('title', 'supplier', 'id'));
+        $saPass = User::where('name', 'LO HARYANTO')->pluck('show_password')->first();
+        $myPass = auth()->user()->show_password;
+
+        $now = now()->format('Y-m-d');
+        $hargaSementara = HargaSementara::where('date_first', '>=' ,$now)->orderBy('date_first', 'asc')->get();
+
+        return view('index-supplier', compact('title', 'supplier', 'id', 'saPass', 'myPass', 'now', 'hargaSementara'));
     }
 
     // return
     public function storeReturnData(Request $request)
     {
         // get nomor return
-        $sequence = '0001';
-        $dateNow = now()->format('ym');
-        $getLastReturn = PengembalianSecond::max("nomor_return");
-        if ($getLastReturn) {
-            $explodeLastReturn = explode('-', $getLastReturn);
-            if ($explodeLastReturn[1] == $dateNow) {
-                $sequence = (int) $explodeLastReturn[2] + 1;
-            } else {
-                (int) $sequence;
-            }
-        } else {
-            (int) $sequence;
-        }
-        $getNomorReturn = 'RR-' . $dateNow . '-' . str_pad($sequence, 4, 0, STR_PAD_LEFT);
+        // $sequence = '0001';
+        // $dateNow = now()->format('ym');
+        // $getLastReturn = PengembalianSecond::max("nomor_return");
+        // if ($getLastReturn) {
+        //     $explodeLastReturn = explode('-', $getLastReturn);
+        //     if ($explodeLastReturn[1] == $dateNow) {
+        //         $sequence = (int) $explodeLastReturn[2] + 1;
+        //     } else {
+        //         (int) $sequence;
+        //     }
+        // } else {
+        //     (int) $sequence;
+        // }
+        // $getNomorReturn = 'RR-' . $dateNow . '-' . str_pad($sequence, 4, 0, STR_PAD_LEFT);
         
+        // dd($request->all());
         date_default_timezone_set('Asia/Bangkok');
         $pengembalian = PengembalianSecond::create([
             'id_supplier' => $request->supplier,
-            'nomor_return' => $getNomorReturn,
+            'nomor_return' => null,
             'date' => now()->format('Y-m-d'),
             'jam' => now()->format('H:i:s'),
             'total' => $request->grandTotal,
@@ -518,8 +527,16 @@ class HomeController extends Controller
         foreach ($products as $product) {
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
-            $output .= "<span>" . number_format($product['field_total'], 0, ',', '.') . "</span>";
+            if ($product['order'] == 1) {
+                $output .= "<span>" . number_format($product['field_total'], 0, ',', '.') . "</span>";
+            }
             $output .= "</div>";
+            if ($product['order'] > 1) {
+                $output .= "<div class='product-item'>";
+                $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format($product['price'], 0, ',', '.') . "</span>";
+                $output .= "<span>" . number_format($product['field_total'], 0, ',', '.') . "</span>";
+                $output .= "</div>";
+            }
         }
         
         $output .= "<div class='separator'></div>";
@@ -529,7 +546,8 @@ class HomeController extends Controller
         $output .= "</div>";
         $output .= "<div class='product-item'>";
         $output .= "<span class='total'>" . auth()->user()->name . "</span>";
-        $output .= "<span class='total'>( NO#:{$pengembalian->nomor_return} )</span>";
+        // $output .= "<span class='total'>( NO#:{$pengembalian->nomor_return} )</span>";
+        $output .= "<span class='total'>( RETURN )</span>";
         $output .= "<span class='total'>QTY: " . count($products) . "</span>";
         $output .= "</div>";
         $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
