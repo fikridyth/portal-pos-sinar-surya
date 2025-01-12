@@ -95,8 +95,8 @@ class ProductDataTable extends DataTable
         return [
             Column::make('kode_alternatif')->title('KODE')->addClass('text-center text-black'),
             Column::make('nama')->title('NAMA BARANG')->addClass('text-black'),
-            Column::make('harga_pokok')->title('HARGA BELI')->addClass('text-end text-black'),
-            Column::make('harga_jual')->title('HARGA JUAL')->addClass('text-end text-black'),
+            // Column::make('harga_pokok')->title('HARGA BELI')->addClass('text-end text-black'),
+            Column::make('harga_jual')->title('HARGA')->addClass('text-end text-black'),
         ];
     }
 

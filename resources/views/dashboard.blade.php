@@ -687,7 +687,7 @@
                 }
             }
             
-            if (event.key.toLowerCase() === 'x') {
+            if (event.key.toLowerCase() === '*') {
                 // Isi value input ke dalam elemen #input-text
                 const inputValue = input.value; // Ambil nilai yang ada di input
                 document.getElementById('input-text').innerHTML = inputValue; // Set value ke elemen input-text
