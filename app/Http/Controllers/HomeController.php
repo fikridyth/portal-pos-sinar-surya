@@ -25,7 +25,8 @@ class HomeController extends Controller
         $myPass = auth()->user()->show_password;
 
         $now = now()->format('Y-m-d');
-        $hargaSementara = HargaSementara::where('date_first', '>=' ,$now)->orderBy('date_first', 'asc')->get();
+        // $hargaSementara = HargaSementara::where('date_first', '>=' ,$now)->orderBy('date_first', 'asc')->get();
+        $hargaSementara = HargaSementara::where('date_first', '<=', $now)->orderBy('date_first', 'desc')->get();
 
         return view('dashboard', compact('title', 'saPass', 'myPass', 'now', 'hargaSementara'));
     }
@@ -411,8 +412,11 @@ class HomeController extends Controller
     public function listBarang(ProductDataTable $dataTable)
     {
         $title = 'List Barang';
+        $now = now()->format('Y-m-d');
+        $hargaSementara = HargaSementara::where('date_first', '<=', $now)->orderBy('date_first', 'desc')->get();
+        // dd($hargaSementara);
 
-        return $dataTable->render('list-barang', compact('title'));
+        return $dataTable->render('list-barang', compact('title', 'now', 'hargaSementara'));
     }
 
     // list product for supplier

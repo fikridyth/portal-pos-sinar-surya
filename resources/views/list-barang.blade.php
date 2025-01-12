@@ -64,12 +64,25 @@
                     const currentDate = now.toISOString().split('T')[0];
 
                     // implementasi harga sementara
-                    let hargaJual;
-                    if (link.getAttribute('data-harga-sementara') && (link.getAttribute('data-tanggal-awal') <= currentDate && link.getAttribute('data-tanggal-akhir') >= currentDate)) {
-                        hargaJual = parseFloat(link.getAttribute('data-harga-sementara'));
-                    } else {
-                        hargaJual = parseFloat(link.getAttribute('data-harga-jual'));
+                    // let hargaJual;
+                    // if (link.getAttribute('data-harga-sementara') && (link.getAttribute('data-tanggal-awal') <= currentDate && link.getAttribute('data-tanggal-akhir') >= currentDate)) {
+                    //     hargaJual = parseFloat(link.getAttribute('data-harga-sementara'));
+                    // } else {
+                    //     hargaJual = parseFloat(link.getAttribute('data-harga-jual'));
+                    // }
+                    let hargaJual = parseFloat(link.getAttribute('data-harga-jual'));
+                    let productId = link.getAttribute('data-id');
+                    var dateNow = @json($now);
+                    var hargaSementara = @json($hargaSementara);
+                    var hargaPertama = hargaSementara.find(function(harga) {
+                        return productId == harga.id_product;
+                    });
+                    if (hargaPertama) {
+                        if (hargaPertama.date_first <= dateNow) {
+                            hargaJual = parseFloat(hargaPertama.harga_sementara);
+                        }
                     }
+
                     const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
                     const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder : inputOrder;
 

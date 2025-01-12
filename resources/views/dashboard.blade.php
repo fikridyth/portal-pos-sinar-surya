@@ -869,7 +869,7 @@
                             return data.product.id == harga.id_product;
                         });
                         if (hargaPertama) {
-                            if (hargaPertama.date_first == dateNow) {
+                            if (hargaPertama.date_first <= dateNow) {
                                 hargaJual = hargaPertama.harga_sementara;
                             }
                         }
