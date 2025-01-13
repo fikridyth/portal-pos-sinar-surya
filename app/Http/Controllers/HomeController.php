@@ -243,6 +243,25 @@ class HomeController extends Controller
         return response()->json(['printData' => $printData]);
     }
 
+    public function ReprintPembelianKarton(Request $request)
+    {
+        $penjualan = Penjualan::find($request->id);
+        $products = json_decode($request->input('detail'), true);
+        $productCartons = [];
+        foreach ($products as $product) {
+            $nama = $product['nama'];
+            $parts = explode('P', $nama);
+            $getNumber = end($parts);
+
+            if ((int)$getNumber > 1) {
+                $productCartons[] = $product;
+            }
+        }
+        $printData = $this->formatReprintData($penjualan, $productCartons);
+
+        return response()->json(['printData' => $printData]);
+    }
+
     private function formatReprintData($penjualan, $products)
     {
         // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";

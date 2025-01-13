@@ -84,7 +84,7 @@
     </div>
     
     <div class="text-center mt-2">
-        {{-- <button type="button" onclick="window.history.back()" class="btn btn-danger mt-3 mx-3">C = CETAK</button> --}}
+        <a href="#" id="linkKarton" class="btn btn-danger mt-3 mx-3">V = CETAK KARTON</a>
         <a href="#" id="linkPilih" class="btn btn-danger mt-3 mx-3">C = CETAK</a>
         <button type="button" onclick="window.history.back()" class="btn btn-danger mt-3 mx-3">R = KEMBALI</button>
     </div>
@@ -131,6 +131,48 @@
 
                             // AJAX request to your server
                             fetch('/reprint-pembelian', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
+                                },
+                                body: JSON.stringify({ id: id, detail: currentDetail })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                printReceipt(data.printData);
+                            })
+                            .catch(error => console.error('Error:', error));
+                        }
+                    }, { once: true });
+
+                    document.getElementById('linkKarton').addEventListener('click', function(event) {
+                        event.preventDefault(); // Prevent default action of the link
+                        const id = currentCheckbox.closest('tr').dataset.id;
+
+                        // AJAX request to your server
+                        fetch('/reprint-pembelian-karton', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
+                            },
+                            body: JSON.stringify({ id: id, detail: currentDetail })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            printReceipt(data.printData); // Assuming this function exists to handle printing the receipt
+                        })
+                        .catch(error => console.error('Error:', error));
+                    });
+
+                    document.addEventListener('keydown', function(event) {
+                        if (event.key === 'v' || event.key === 'V') {
+                            event.preventDefault();
+                            const id = currentCheckbox.closest('tr').dataset.id;
+
+                            // AJAX request to your server
+                            fetch('/reprint-pembelian-karton', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
