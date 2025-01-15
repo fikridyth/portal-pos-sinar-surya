@@ -456,7 +456,7 @@ class HomeController extends Controller
 
     public function indexSupplier($id)
     {
-        $id = dekrip($id);
+        // $id = dekrip($id);
         $title = 'Kembali Barang';
         $supplier = Supplier::find($id);
 
