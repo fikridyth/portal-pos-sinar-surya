@@ -54,20 +54,20 @@ class HomeController extends Controller
     {
         // dd($request->all());
         $products = $request->input('products');
+        $productCartons = [];
+        foreach ($products as $product) {
+            $nama = $product['nama'];
+            $parts = explode('P', $nama);
+            $getNumber = end($parts);
+
+            if ((int)$getNumber > 1) {
+                $productCartons[] = $product;
+            }
+        }
+        dd($products);
 
         $sequence = '000001';
         $getLastPo = Penjualan::max("no");
-        // $dateNow = now()->format('Y-m-d');
-        // if ($getLastPo) {
-        //     $explodeLastPo = explode('-', $getLastPo);
-        //     if ($explodeLastPo[1] == $dateNow) {
-        //         $sequence = (int) $explodeLastPo[2] + 1;
-        //     } else {
-        //         (int) $sequence;
-        //     }
-        // } else {
-        //     (int) $sequence;
-        // } 
         if ($getLastPo) {
             $sequence = (int) $getLastPo + 1;
         } else {
