@@ -128,6 +128,20 @@
         </div>
     </div>
 
+    {{-- karton modal --}}
+    <div id="productCartonsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999;">
+        <div style="position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; width: 50%; max-width: 1000px;">
+            <h4>DAFTAR BARANG KARTON</h4>
+            <hr>
+            <div id="cartonsContent"></div>
+            <div class="d-flex justify-content-between">
+                <button onclick="closeModalKarton()" class="btn btn-sm btn-danger" style="margin-top: 20px; padding: 10px 35px;">TUTUP</button>
+                <button id="nextButton" class="btn btn-sm btn-primary" style="margin-top: 20px; padding: 10px 20px;">LANJUTKAN</button>
+            </div>
+        </div>
+    </div>
+    
+
     <!-- Modal -->
     @include('modal')
 @endsection
@@ -1011,7 +1025,169 @@
     // implementasi klik yang tidak menggunakan otoritas
 
     // store data ke tabel penjualan
+        function filterProductCartons(productDetails) {
+            const productCartons = [];
+
+            productDetails.forEach(product => {
+                const nama = product.nama; // Mengakses properti 'nama' dari setiap produk
+                const parts = nama.split('P'); // Memisahkan string berdasarkan karakter 'P'
+                const getNumber = parts[parts.length - 1]; // Mendapatkan bagian terakhir setelah split
+
+                if (parseInt(getNumber) > 1) { // Memeriksa apakah angkanya lebih besar dari 1
+                    productCartons.push(product);
+                }
+            });
+
+            return productCartons;
+        }
+
+        function showModalKarton(data) {
+            const modal = document.getElementById("productCartonsModal");
+            const content = document.getElementById("cartonsContent");
+
+            // Clear existing content
+            content.innerHTML = "";
+
+            // Create table
+            const table = document.createElement("table");
+            table.style.width = "100%";
+            table.style.borderCollapse = "collapse";
+
+            // Create table header
+            const headerRow = document.createElement("tr");
+            ["Nama", "Harga", "Order", "Total"].forEach(headerText => {
+                const th = document.createElement("th");
+                th.textContent = headerText;
+                th.style.border = "1px solid #ddd";
+                th.style.padding = "8px";
+                th.style.textAlign = "left";
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+
+            // Add product rows
+            data.forEach(product => {
+                const row = document.createElement("tr");
+
+                // Create cells for each field
+                const fields = [
+                    product.nama,
+                    product.harga ? `${product.harga.toLocaleString()}` : "-",
+                    product.order ? product.order : "-",
+                    product.harga && product.order ? `${(product.harga * product.order).toLocaleString()}` : "-"
+                ];
+
+                fields.forEach(field => {
+                    const td = document.createElement("td");
+                    td.textContent = field;
+                    td.style.border = "1px solid #ddd";
+                    td.style.padding = "8px";
+                    row.appendChild(td);
+                });
+
+                table.appendChild(row);
+            });
+
+            // Append table to content
+            content.appendChild(table);
+
+            // Show modal
+            modal.style.display = "block";
+
+            document.addEventListener("keydown", handleEnterKeyKarton);
+        }
+
+        function closeModalKarton() {
+            const modal = document.getElementById("productCartonsModal");
+            modal.style.display = "none";
+        }
+
+        function handleEnterKeyKarton(event) {
+            if (event.key === "Enter") {
+                const nextButton = document.getElementById("nextButton");
+                if (nextButton) {
+                    nextButton.click(); // Simulate button click
+                }
+            }
+        }
+        
         function submitData() {
+            const productCartons = filterProductCartons(productDetails);
+            if (productCartons.length > 0) {
+                showModalKarton(productCartons);
+                return;
+            }
+
+            const inputSubmit = document.getElementById('barcode-input').value;
+            const detail = JSON.stringify({
+                products: productDetails,
+                grandTotal: grandTotal,
+                grandDiskon: grandDiskon,
+                payment: inputSubmit,
+            });
+
+            fetch('{{ route('penjualan.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}', // Include CSRF token
+                    },
+                    body: detail, // Send the collected product details
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json(); // or response.text() based on your response
+                })
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        const topTbody = document.querySelector('tbody.top');
+                        const newRow2 = document.createElement('tr');
+                        const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+
+                        newRow2.innerHTML = `
+                            <td style="width: 75px;"></td><td style="width: 200px;"></td><td></td><td style="width: 100px;" class="text-end"></td><td style="width: 175px;" class="text-end"></td><td style="width: 175px;" class="text-end"></td><td style="width: 175px;" class="text-end"></td>
+                        `;
+                        const newRow = document.createElement('tr');
+                        newRow.innerHTML = `
+                            <td style="width: 75px;" class="text-center">STL</td>
+                            <td style="width: 200px;" class="text-center"></td>
+                            <td>SUBTOTAL</td>
+                            <td style="width: 100px;" class="text-end">1</td>
+                            <td style="width: 175px;" class="text-end">${number_format(data.penjualan.total)}</td>
+                            <td style="width: 175px;" class="text-end" id="input-diskon">${number_format(data.penjualan.diskon ?? 0)}</td>
+                            <td style="width: 175px;" class="text-end" id="value-total">${number_format(data.penjualan.total - (data.penjualan.diskon ?? 0))}</td>
+                        `;
+                        topTbody.insertBefore(newRow2, lastInsertedRow);
+                        topTbody.insertBefore(newRow, lastInsertedRow);
+                        document.getElementById('big-total').innerHTML = number_format(data.penjualan.return);
+
+                        printReceipt(data.printData);
+
+                        // Clear localStorage on page unload
+                        // window.addEventListener('beforeunload', function() {
+                            // localStorage.removeItem('productDetails');
+                            // localStorage.removeItem('grandTotal');
+                            // localStorage.removeItem('grandDiskon');
+                            // localStorage.removeItem('grandTotalDiskon');
+                        // });
+                    }
+                })
+                .catch(error => {
+                    console.error('There was a problem with the fetch operation:', error);
+                });
+        }
+
+        document.getElementById("nextButton").addEventListener("click", function () {
+            closeModalKarton(); // Tutup modal
+            submitDataKarton(); // Panggil kembali fungsi submitData
+        });
+        
+        function submitDataKarton() {
             const inputSubmit = document.getElementById('barcode-input').value;
             const detail = JSON.stringify({
                 products: productDetails,

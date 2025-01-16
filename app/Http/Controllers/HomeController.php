@@ -54,18 +54,6 @@ class HomeController extends Controller
     {
         // dd($request->all());
         $products = $request->input('products');
-        $productCartons = [];
-        foreach ($products as $product) {
-            $nama = $product['nama'];
-            $parts = explode('P', $nama);
-            $getNumber = end($parts);
-
-            if ((int)$getNumber > 1) {
-                $productCartons[] = $product;
-            }
-        }
-        dd($products);
-
         $sequence = '000001';
         $getLastPo = Penjualan::max("no");
         if ($getLastPo) {
