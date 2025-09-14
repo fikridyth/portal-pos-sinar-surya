@@ -46,30 +46,6 @@
             <div class="d-flex justify-content-center">
                 <div class="d-flex justify-content-center mb-2 p-2"
                     style="color: white; border: 2px solid white; border-bottom: none; margin-top: 25px; background-color: gray; width: 40%;">
-                    {{-- <div class="d-flex justify-content-center" style="overflow-x: auto; height: 155px; border: 1px solid #ccc; background-color: white;">
-                        <table class="table table-bordered" style="width: 100%; table-layout: auto;">
-                            <thead>
-                                <tr>
-                                    <th class="text-center text-black">JENIS PROGRAM</th>
-                                    <th class="text-center text-black">PILIH</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="color: black">KASIR TANPA SCAN DUDUK</td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td style="color: black">KASIR DENGAN SCAN DUDUK</td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                                <tr>
-                                    <td style="color: black">KASIR TANPA JARTECH</td>
-                                    <td class="text-center"><input type="checkbox"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div> --}}
                 </div>
             </div>
             <div class="d-flex justify-content-center">
@@ -85,8 +61,6 @@
                 style="color: white; background-color: blue; border: 2px solid white; margin-top: 120px;">
                 <h5 class="mx-2">POS NO <input class="mx-2" type="text" size="5" readonly value="01"></h5>
                 <h5 class="mx-2">KASIR <input class="mx-2" type="text" size="20" readonly value="{{ auth()->user()->name }}"></h5>
-                {{-- <h5 class="mx-2">DATA <input class="mx-2" type="text" size="5" value="0"></h5> --}}
-                {{-- <button class="btn btn-sm btn-dark" style="width: 150px;">KOREKSI</button> --}}
             </div>
         </div>
     </div>
@@ -96,6 +70,9 @@
     <script>
         // end-of-day
         document.getElementById('process-button').addEventListener('click', function() {
+            const button = this;
+            button.disabled = true;
+            button.innerText = 'MEMPROSES...';
             fetch('/process-end-of-day', {
                     method: 'POST',
                     headers: {
