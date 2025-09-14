@@ -304,6 +304,25 @@
         document.dispatchEvent(event);
     });
     
+    // kredit
+    document.getElementById('modal-kredit-cell').addEventListener('click', function() {
+        // Create and dispatch a 'keydown' event programmatically
+        const event = new KeyboardEvent('keydown', {
+            key: 'U',
+            bubbles: true
+        });
+        document.dispatchEvent(event);
+    });
+    
+    document.getElementById('modal-kredit-cell2').addEventListener('click', function() {
+        // Create and dispatch a 'keydown' event programmatically
+        const event = new KeyboardEvent('keydown', {
+            key: 'U',
+            bubbles: true
+        });
+        document.dispatchEvent(event);
+    });
+    
     // signoff
     document.getElementById('modal-signoff-cell').addEventListener('click', function() {
         // Create and dispatch a 'keydown' event programmatically

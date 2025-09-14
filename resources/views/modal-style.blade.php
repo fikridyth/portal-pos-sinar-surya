@@ -351,6 +351,28 @@
         cursor: pointer;
     }
 
+    #modal-kredit-cell {
+        font-size: 24px;
+        transition: background-color 0.3s ease;
+    }
+
+    #modal-kredit-cell:hover {
+        background-color: #f0f0f0;
+        color: black;
+        cursor: pointer;
+    }
+
+    #modal-kredit-cell2 {
+        font-size: 24px;
+        transition: background-color 0.3s ease;
+    }
+
+    #modal-kredit-cell2:hover {
+        background-color: #f0f0f0;
+        color: black;
+        cursor: pointer;
+    }
+
     #modal-signoff-cell {
         font-size: 24px;
         transition: background-color 0.3s ease;

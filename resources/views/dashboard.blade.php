@@ -423,6 +423,15 @@
                         localStorage.removeItem('grandTotalDiskon');
                     });
                     window.location.href = '/list-supplier';
+                } else if ((passwordInput.dataset.action === 'u' || passwordInput.dataset.action === 'U') && (password === saPassword || password === myPassword)) {
+                    event.preventDefault();
+                    window.addEventListener('beforeunload', function() {
+                        localStorage.removeItem('productDetails');
+                        localStorage.removeItem('grandTotal');
+                        localStorage.removeItem('grandDiskon');
+                        localStorage.removeItem('grandTotalDiskon');
+                    });
+                    window.location.href = '/list-kredit';
                 } else if (passwordInput.dataset.action === 'F5' && password === saPassword) {
                     event.preventDefault();
                     submitDataVoid();
@@ -499,6 +508,14 @@
                 event.preventDefault();
                 passwordInput.value = '';
                 handlePasswordModal('Y');
+            } else if (event.key === 'u') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('u');
+            } else if (event.key === 'U') {
+                event.preventDefault();
+                passwordInput.value = '';
+                handlePasswordModal('U');
             } else if (event.key === 'F7') {
                 event.preventDefault();
                 passwordInput.value = '';

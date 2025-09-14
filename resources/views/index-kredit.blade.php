@@ -80,7 +80,7 @@
         <div style="width: 90%;">
             <div class="d-flex justify-content-between align-items-center mt-2 mb-2"
                 style="color: white; border: 2px solid white">
-                <p class="mx-2 mt-n1 mb-n1" style="margin-top: 0; margin-bottom: 0;">KEMBALI BARANG SUPPLIER <br>{{ $supplier->nama }}</p>
+                <p class="mx-2 mt-n1 mb-n1" style="margin-top: 0; margin-bottom: 0;">PENJUALAN KREDIT <br>{{ $supplier->nama }}</p>
                 <h4>SINAR SURYA</h4>
                 <h6 class="mx-3">T = TOMBOL | F2 = BATAL</h6>
             </div>
@@ -664,7 +664,7 @@
                 localStorage.setItem('grandTotalDiskon', grandTotalDiskon);
                 localStorage.setItem('inputOrder', inputOrder.value);
                 localStorage.setItem('scanLabel', document.getElementById('label-cell').innerText);
-                window.location.href = `/list-barang-supplier/${id}`;
+                window.location.href = `/list-barang-kredit/${id}`;
             }
 
             // kirim data dengan fetch
@@ -949,7 +949,7 @@
                 grandTotal: grandTotal,
                 // grandDiskon: grandDiskon
             });
-            fetch('{{ route('store-return-data') }}', {
+            fetch('{{ route('store-kredit-data') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -145,6 +145,14 @@
                                 </tr>
 
                                 <tr>
+                                    <td class="text-center" id="modal-kredit-cell" data-bs-dismiss="modal"><b>U</b></td>
+                                    <td id="modal-kredit-cell2" data-bs-dismiss="modal">PENJUALAN KREDIT</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="border-top: 2px solid white; margin-top: 3px;"></td>
+                                </tr>
+
+                                <tr>
                                     <td class="text-center" id="modal-signoff-cell" data-bs-dismiss="modal"><b>F2</b></td>
                                     <td id="modal-signoff-cell2" data-bs-dismiss="modal">SIGN OFF</td>
                                 </tr>

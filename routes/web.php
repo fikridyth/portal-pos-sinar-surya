@@ -58,9 +58,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/index-supplier/{id}', [HomeController::class, 'indexSupplier'])->name('index-supplier');
     Route::post('/store-return-data', [HomeController::class, 'storeReturnData'])->name('store-return-data');
 
+    // list kredit
+    Route::get('/list-kredit', [HomeController::class, 'listKredit'])->name('list-kredit');
+    Route::get('/index-kredit/{id}', [HomeController::class, 'indexKredit'])->name('index-kredit');
+    Route::post('/store-kredit-data', [HomeController::class, 'storeKreditData'])->name('store-kredit-data');
+
     // list barang
     Route::get('/list-barang', [HomeController::class, 'listBarang'])->name('list-barang');
     Route::get('/list-barang-supplier/{id}', [HomeController::class, 'listBarangSupplier'])->name('list-barang-supplier');
+    Route::get('/list-barang-kredit/{id}', [HomeController::class, 'listBarangKredit'])->name('list-barang-kredit');
 
     // list hold
     Route::post('/penjualan/hold', [HomeController::class, 'holdPenjualan'])->name('penjualan.hold');

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\LanggananDataTable;
 use App\DataTables\ProductDataTable;
 use App\DataTables\SupplierDataTable;
 use App\Models\HargaSementara;
 use App\Models\Hold;
+use App\Models\KreditSecond;
+use App\Models\Langganan;
 use App\Models\Penjualan;
 use App\Models\Product;
 use App\Models\PengembalianSecond;
@@ -686,6 +689,16 @@ class HomeController extends Controller
         return $dataTable->render('list-barang-supplier', compact('title', 'id', 'now', 'hargaSementara'));
     }
 
+    // list product for supplier
+    public function listBarangKredit(ProductDataTable $dataTable, $id)
+    {
+        $title = 'List Barang';
+        $now = now()->format('Y-m-d');
+        $hargaSementara = HargaSementara::where('date_first', '<=', $now)->orderBy('date_first', 'desc')->get();
+
+        return $dataTable->render('list-barang-kredit', compact('title', 'id', 'now', 'hargaSementara'));
+    }
+
     // supplier
     public function listSupplier(SupplierDataTable $dataTable)
     {
@@ -712,22 +725,6 @@ class HomeController extends Controller
     // return
     public function storeReturnData(Request $request)
     {
-        // get nomor return
-        // $sequence = '0001';
-        // $dateNow = now()->format('ym');
-        // $getLastReturn = PengembalianSecond::max("nomor_return");
-        // if ($getLastReturn) {
-        //     $explodeLastReturn = explode('-', $getLastReturn);
-        //     if ($explodeLastReturn[1] == $dateNow) {
-        //         $sequence = (int) $explodeLastReturn[2] + 1;
-        //     } else {
-        //         (int) $sequence;
-        //     }
-        // } else {
-        //     (int) $sequence;
-        // }
-        // $getNomorReturn = 'RR-' . $dateNow . '-' . str_pad($sequence, 4, 0, STR_PAD_LEFT);
-        
         // dd($request->all());
         date_default_timezone_set('Asia/Bangkok');
         $pengembalian = PengembalianSecond::create([
@@ -812,8 +809,121 @@ class HomeController extends Controller
         // $output .= "<span class='total'>( NO#:{$pengembalian->nomor_return} )</span>";
         $output .= "<span class='total'>( RETURN )</span>";
         $output .= "<span class='total'>QTY: " . count($products) . "</span>";
+        $output .= "</div>
+                </body>
+            </html>";
+        return $output;
+    }
+
+    // kredit
+    public function listKredit(LanggananDataTable $dataTable)
+    {
+        $title = 'List Langganan';
+
+        return $dataTable->render('list-kredit', compact('title'));
+    }
+
+    public function indexKredit($id)
+    {
+        // $id = dekrip($id);
+        $title = 'Penjualan Kredit';
+        $supplier = Langganan::find($id);
+
+        $saPass = User::where('name', 'LO HARYANTO')->pluck('show_password')->first();
+        $myPass = auth()->user()->show_password;
+
+        $now = now()->format('Y-m-d');
+        $hargaSementara = HargaSementara::where('date_first', '>=' ,$now)->orderBy('date_first', 'asc')->get();
+
+        return view('index-kredit', compact('title', 'supplier', 'id', 'saPass', 'myPass', 'now', 'hargaSementara'));
+    }
+
+    // return
+    public function storeKreditData(Request $request)
+    {
+        date_default_timezone_set('Asia/Bangkok');
+        $pengembalian = KreditSecond::create([
+            'id_langganan' => $request->supplier,
+            'nomor_return' => null,
+            'date' => now()->format('Y-m-d'),
+            'total' => $request->grandTotal,
+            'created_by' => auth()->user()->name,
+            'detail' => json_encode($request->detail)
+        ]);
+
+        $detail = json_encode($request->detail);
+        $products = json_decode($detail, true);
+
+        $printData = $this->formatPrintKreditData($pengembalian, $products);
+
+        return response()->json(['printData' => $printData]);
+    }
+
+    private function formatPrintKreditData($pengembalian, $products)
+    {
+        $output = "
+            <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            width: 58mm; 
+                            margin: 0 auto; 
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 10px; 
+                            font-size: 12px; 
+                        }
+                        .products { 
+                            margin-top: 5px; 
+                        }
+                        .product-item { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .total { 
+                            margin-top: 5px; 
+                            font-weight: bold; 
+                        }
+                        .separator { 
+                            margin-top: 5px; 
+                            border-top: 1px dashed black; 
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
+    
+        foreach ($products as $product) {
+            $output .= "<div class='product-item'>";
+            $output .= "<span>{$product['nama']}</span>";
+            if ($product['order'] == 1) {
+                $output .= "<span>" . number_format($product['field_total'], 0, ',', '.') . "</span>";
+            }
+            $output .= "</div>";
+            if ($product['order'] > 1) {
+                $output .= "<div class='product-item'>";
+                $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format($product['price'], 0, ',', '.') . "</span>";
+                $output .= "<span>" . number_format($product['field_total'], 0, ',', '.') . "</span>";
+                $output .= "</div>";
+            }
+        }
+        
+        $output .= "<div class='separator'></div>";
+        $output .= "<div class='product-item'>";
+        $output .= "<span>TOTAL</span>";
+        $output .= "<span>" . number_format($pengembalian->total, 0, ',', '.') . "</span>";
         $output .= "</div>";
-        $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>
+        $output .= "<div class='product-item'>";
+        $output .= "<span class='total'>" . auth()->user()->name . "</span>";
+        // $output .= "<span class='total'>( NO#:{$pengembalian->nomor_return} )</span>";
+        $output .= "<span class='total'>( KREDIT )</span>";
+        $output .= "<span class='total'>QTY: " . count($products) . "</span>";
+        $output .= "</div>
                 </body>
             </html>";
         return $output;
