@@ -89,16 +89,207 @@ class HomeController extends Controller
         return response()->json(['penjualan' => $dataPenjualan, 'printData' => $printData]);
     }
 
-    public function printPembelian(Request $request)
+    private function formatPrintData($penjualan, $products)
     {
-        $penjualan = Penjualan::find($request->id);
-        $products = json_decode($request->input('detail'), true);
-        $printData = $this->formatPrintData($penjualan, $products);
+        // dd($products);
+        // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
+        $output = "
+            <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            width: 58mm; 
+                            margin: 0 auto; 
+                        }
+                        .header-item { 
+                            display: flex; 
+                            justify-content: space-between;
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 10px; 
+                            font-size: 10px; 
+                        }
+                        .products { 
+                            margin-top: 5px; 
+                        }
+                        .product-item { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .total { 
+                            margin-top: 8px; 
+                            font-weight: bold; 
+                        }
+                        .separator { 
+                            margin-top: 5px; 
+                            border-top: 1px dashed black; 
+                        }
+                        .separator-second {
+                            margin-top: -5px; 
+                            border-top: 1px dashed black; 
+                        }
+                    </style>
+                </head>
+                <body>";
 
-        return response()->json(['printData' => $printData]);
+        $output .= "<div class='header-item'>";
+        $output .= "<span>***</span>";
+        $output .= "<span>SINAR SURYA</span>";
+        $output .= "<span>***</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>*</span>";
+        $output .= "<span>JL. PASAR BARU NO. 42</span>";
+        $output .= "<span>*</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>***</span>";
+        $output .= "<span>BOGOR</span>";
+        $output .= "<span>***</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item' style='margin-bottom: 15px;'>";
+        $output .= "<span>TELP. (0251)8324647</span>";
+        $output .= "<span>FAX. (0251) 835702</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
+        
+        foreach ($products as $product) {
+            // dd($products);
+            $output .= "<div class='product-item'>";
+            $output .= "<span>{$product['nama']}</span>";
+            if ($product['order'] <= 1) {
+                $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+                
+            }
+            $output .= "</div>";
+            if ($product['order'] > 1) {
+                $output .= "<div class='product-item'>";
+                $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format($product['harga'], 0, ',', '.') . "</span>";
+                $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+                $output .= "</div>";
+            }
+        }
+        
+        $output .= "<div class='separator'></div>";
+        $output .= "<div class='product-item' style='margin-top: 7px;'>";
+        $output .= "<span>TOTAL</span>";
+        $output .= "<span>" . number_format($penjualan['total'], 0, ',', '.') . "</span>";
+        $output .= "</div>";
+        if ($penjualan['payment'] !== 0) {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span>" . number_format($penjualan['diskon'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>TENDER 01</span>";
+            $output .= "<span>" . number_format($penjualan['payment'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>KEMBALI</span>";
+            $output .= "<span>" . number_format($penjualan['return'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+        } else {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span>" . number_format($penjualan['diskon'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>TENDER 01</span>";
+            $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+        }
+        $output .= "<div class='product-item'>";
+        $output .= "<span class='total'>" . auth()->user()->name . "</span>";
+        $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
+        $output .= "<span class='total'>QTY: " . array_sum(array_column($products, 'order')) . "</span>";
+        $output .= "</div>";
+        $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>";
+        $output .= "<div class='separator'></div>";
+        $output .= "<div class='separator-second'></div>";
+
+        // Pisahkan data VOD dan RTN
+        $vodItems = array_filter($products, fn($item) => $item['label'] === 'VOD');
+        $rtnItems = array_filter($products, fn($item) => $item['label'] === 'RTN');
+
+        if (!empty($vodItems) || !empty($rtnItems)) {
+            $output .= "<div style='margin-top: 80px;'></div>";
+            $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
+            // VOD section
+            if (!empty($vodItems)) {
+                $output .= "<div style='margin-top: 8px; font-weight: bold;'>VOID</div>";
+                foreach ($vodItems as $item) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span>{$item['nama']}</span>";
+                    $output .= "<span>" . number_format($item['grand_total'], 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+
+            // RTN section
+            if (!empty($rtnItems)) {
+                $output .= "<div style='margin-top: 8px; font-weight: bold;'>RETURN</div>";
+                foreach ($rtnItems as $item) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span>{$item['nama']}</span>";
+                    $output .= "<span>" . number_format($item['grand_total'], 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+        }
+
+        $output .= "</body>
+            </html>";
+        return $output;
     }
 
-    private function formatPrintData($penjualan, $products)
+    public function storeVoidData(Request $request)
+    {
+        // dd($request->all());
+        $products = $request->input('products');
+        $sequence = '000001';
+        $getLastPo = Penjualan::max("no");
+        if ($getLastPo) {
+            $sequence = (int) $getLastPo + 1;
+        } else {
+            (int) $sequence;
+        }
+        $getNomor = str_pad($sequence, 6, 0, STR_PAD_LEFT);
+
+        $valueGrandTotal = $request->grandTotal - $request->grandDiskon;
+        $dataPenjualan = [
+            'tanggal' => Carbon::now()->setTimezone('Asia/Jakarta')->format('Y-m-d'),
+            'jam' => Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i:s'),
+            'detail' => json_encode($products),
+            'total' => $request->grandTotal,
+            'diskon' => $request->grandDiskon,
+            'grand_total' => $valueGrandTotal,
+            'payment' => $request->payment ?? 0,
+            'return' => $request->payment ? $request->payment - $valueGrandTotal : $valueGrandTotal,
+            'no' => $getNomor,
+            'created_by' => auth()->user()->name
+        ];
+
+        // dd($products);
+        if ($products == []) {
+            return response()->json(['error' => 'No data scanned!']);
+        }
+
+        $printData = $this->formatPrintDataVoid($dataPenjualan, $products);
+        
+        return response()->json(['penjualan' => $dataPenjualan, 'printData' => $printData]);
+    }
+    private function formatPrintDataVoid($penjualan, $products)
     {
         // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
         $output = "
@@ -173,10 +364,10 @@ class HomeController extends Controller
         $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
         
         foreach ($products as $product) {
-            // dd($product['order']);
+            // dd($products);
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
-            if ($product['order'] == 1) {
+            if ($product['order'] <= 1) {
                 $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
                 
             }
@@ -192,9 +383,13 @@ class HomeController extends Controller
         $output .= "<div class='separator'></div>";
         $output .= "<div class='product-item' style='margin-top: 7px;'>";
         $output .= "<span>TOTAL</span>";
-        $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
+        $output .= "<span>" . number_format($penjualan['total'], 0, ',', '.') . "</span>";
         $output .= "</div>";
         if ($penjualan['payment'] !== 0) {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span>" . number_format($penjualan['diskon'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
             $output .= "<div class='product-item' style='margin-top: 2px;'>";
             $output .= "<span>TENDER 01</span>";
             $output .= "<span>" . number_format($penjualan['payment'], 0, ',', '.') . "</span>";
@@ -205,6 +400,10 @@ class HomeController extends Controller
             $output .= "</div>";
         } else {
             $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span>" . number_format($penjualan['diskon'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
             $output .= "<span>TENDER 01</span>";
             $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
             $output .= "</div>";
@@ -214,7 +413,7 @@ class HomeController extends Controller
         $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
         $output .= "<span class='total'>QTY: " . array_sum(array_column($products, 'order')) . "</span>";
         $output .= "</div>";
-        $output .= "<div class='header total' style='margin-top: 10px;'>TERIMA KASIH ATAS KUNJUNGAN ANDA</div>";
+        $output .= "<div class='header total' style='margin-top: 10px;'>(** ALL VOID **)</div>";
         $output .= "<div class='separator'></div>";
         $output .= "<div class='separator-second'></div>
                 </body>
@@ -328,7 +527,7 @@ class HomeController extends Controller
             // dd($product['order']);
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
-            if ($product['order'] == 1) {
+            if ($product['order'] <= 1) {
                 $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
             }
             $output .= "</div>";
@@ -343,9 +542,13 @@ class HomeController extends Controller
         $output .= "<div class='separator'></div>";
         $output .= "<div class='product-item' style='margin-top: 7px;'>";
         $output .= "<span>TOTAL</span>";
-        $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
+        $output .= "<span>" . number_format($penjualan['total'], 0, ',', '.') . "</span>";
         $output .= "</div>";
         if ($penjualan['payment'] !== 0) {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span>" . number_format($penjualan['diskon'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
             $output .= "<div class='product-item' style='margin-top: 2px;'>";
             $output .= "<span>TENDER 01</span>";
             $output .= "<span>" . number_format($penjualan['payment'], 0, ',', '.') . "</span>";
@@ -355,6 +558,10 @@ class HomeController extends Controller
             $output .= "<span>" . number_format($penjualan['return'], 0, ',', '.') . "</span>";
             $output .= "</div>";
         } else {
+            $output .= "<div class='product-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span>" . number_format($penjualan['diskon'], 0, ',', '.') . "</span>";
+            $output .= "</div>";
             $output .= "<div class='product-item' style='margin-top: 2px;'>";
             $output .= "<span>TENDER 01</span>";
             $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
@@ -367,8 +574,39 @@ class HomeController extends Controller
         $output .= "</div>";
         $output .= "<div class='header total' style='margin-top: 10px;'>(** REPRINT **)</div>";
         $output .= "<div class='separator'></div>";
-        $output .= "<div class='separator-second'></div>
-                </body>
+        $output .= "<div class='separator-second'></div>";
+
+        // Pisahkan data VOD dan RTN
+        $vodItems = array_filter($products, fn($item) => $item['label'] === 'VOD');
+        $rtnItems = array_filter($products, fn($item) => $item['label'] === 'RTN');
+
+        if (!empty($vodItems) || !empty($rtnItems)) {
+            $output .= "<div style='margin-top: 80px;'></div>";
+            $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
+            // VOD section
+            if (!empty($vodItems)) {
+                $output .= "<div style='margin-top: 8px; font-weight: bold;'>VOID</div>";
+                foreach ($vodItems as $item) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span>{$item['nama']}</span>";
+                    $output .= "<span>" . number_format($item['grand_total'], 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+
+            // RTN section
+            if (!empty($rtnItems)) {
+                $output .= "<div style='margin-top: 8px; font-weight: bold;'>RETURN</div>";
+                foreach ($rtnItems as $item) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span>{$item['nama']}</span>";
+                    $output .= "<span>" . number_format($item['grand_total'], 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+        }
+
+        $output .= "</body>
             </html>";
         return $output;
     }    

@@ -43,6 +43,7 @@ Route::middleware('auth')->group(function () {
     // scan barcode, print dan subtotal
     Route::get('/get-detail-products/{kode}', [HomeController::class, 'getDetailProducts']);
     Route::post('/penjualan/store', [HomeController::class, 'storePenjualan'])->name('penjualan.store');
+    Route::post('/store-void-data', [HomeController::class, 'storeVoidData'])->name('store-void-data');
 
     // list pembelian dan print
     Route::get('/list-pembelian', [HomeController::class, 'listPembelian'])->name('list-pembelian');
