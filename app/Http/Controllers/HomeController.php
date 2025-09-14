@@ -40,10 +40,21 @@ class HomeController extends Controller
         return view('list-pembelian', compact('title', 'penjualans'));
     }
 
+    // public function getDetailProducts($kode)
+    // {
+    //     $product = Product::where('kode_alternatif', $kode)->first();
+    //     if (!isset($product)) {
+    //         return response()->json(['error' => 'Barcode Tidak Ditemukan!']);
+    //     }
+
+    //     return response()->json(['product' => $product]);
+    // }
+
     public function getDetailProducts($kode)
     {
-        $product = Product::where('kode_alternatif', $kode)->first();
-        if (!isset($product)) {
+        $product = Product::where('kode_alternatif', $kode)->get();
+
+        if ($product->isEmpty()) {
             return response()->json(['error' => 'Barcode Tidak Ditemukan!']);
         }
 

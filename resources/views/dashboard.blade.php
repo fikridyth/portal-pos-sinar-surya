@@ -2,6 +2,35 @@
 
 @section('styles')
     <style>
+        #productChoiceModal {
+            position: fixed;
+            bottom: 30px;
+            right: 0;
+            width: 300px;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            z-index: 1000;
+        }
+
+        #productChoiceTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        #productChoiceTable td {
+            border: 1px solid #ccc;
+            padding: 8px 10px;
+            font-size: 14px;
+        }
+
+        #productChoiceTable tr:hover {
+            background-color: #f0f0f0;
+            cursor: pointer;
+        }
+
         .modal-password {
             position: fixed;
             bottom: 30px;
@@ -140,7 +169,19 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Modal Pilihan Produk -->
+    <div id="productChoiceModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999;">
+        <div style="position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; width: 50%; max-width: 1000px;">
+            <h4>PILIH PRODUK</h4>
+            <table class="border" style="width: 100%; font-size: 14px; margin-top: 10px;" id="productChoiceTable">
+                <!-- Isi dinamis dari JavaScript -->
+            </table>
+            <div class="d-flex justify-content-between">
+                <button onclick="closeProductModal()" class="btn btn-sm btn-danger" style="margin-top: 20px; padding: 10px 35px;">TUTUP</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modal -->
     @include('modal')
@@ -198,138 +239,6 @@
                 inputTimeout = setTimeout(scanBarcode, 200);
             }
         });
-
-        // function scanBarcode(barcodeValue) {
-        //     const topTbody = document.querySelector('tbody.top');
-        //     const staticRow = topTbody.querySelector('tr:first-child');
-        //     const kode = barcodeValues.join('');
-
-        //     fetch(`/get-detail-products/${kode}`)
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             if (data.error) {
-        //                 alert (data.error)
-        //             } else {
-        //                 // implementasi harga sementara
-        //                 const now = new Date();
-        //                 const currentDate = now.toISOString().split('T')[0];
-        //                 let hargaJual = data.product.harga_jual;
-        //                 // if (data.product.harga_sementara && (data.product.tanggal_awal <= currentDate && data.product.tanggal_akhir >= currentDate)) {
-        //                 //     hargaJual = data.product.harga_sementara;
-        //                 // } else {
-        //                 //     hargaJual = data.product.harga_jual;
-        //                 // }
-        //                 const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
-        //                 const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder.value : inputOrder.value;
-
-        //                 if (scanLabel == 'VOD') {
-        //                     let kodeDitemukan = productDetails.some((data) => data.kode === kode);
-        //                     if (!kodeDitemukan) {
-        //                         alert('DATA TIDAK DITEMUKAN!');
-        //                     } else {
-        //                         const newRow = document.createElement('tr');
-        //                         newRow.innerHTML = `
-        //                             <td class="text-center" style="width: 75px;">${scanLabel}</td>
-        //                             <td class="text-center" style="width: 200px;">${kode}</td>
-        //                             <td>${data.product.nama}/${data.product.unit_jual}</td>
-        //                             <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
-        //                             <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
-        //                             <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
-        //                             <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
-        //                         `;
-        //                         const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
-        //                         if (lastInsertedRow) {
-        //                             topTbody.insertBefore(newRow, lastInsertedRow);
-        //                         } else {
-        //                             topTbody.insertBefore(newRow, staticRow);
-        //                         }
-                                
-        //                         // update total harga
-        //                         grandTotal += displayHarga * inputOrder.value;
-        //                         grandDiskon += 0;
-        //                         grandTotalDiskon += displayHarga * inputOrder.value;
-        //                         document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
-        //                         document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
-        //                         document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
-        //                         document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
-
-        //                         productDetails.push({
-        //                             label: scanLabel,
-        //                             kode: data.product.kode,
-        //                             kode_alternatif: data.product.kode_alternatif,
-        //                             nama: data.product.nama + '/' + data.product.unit_jual,
-        //                             harga: displayHarga,
-        //                             order: displayOrder,
-        //                             total: inputOrder.value * displayHarga,
-        //                             diskon: 0,
-        //                             grand_total: displayHarga - 0
-        //                         });
-                                
-        //                         // Add the event listener in input
-        //                         document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
-        //                         barcodeValues.length = 0;
-        //                         document.getElementById("input-text").innerHTML = 1;
-        //                         document.getElementById("input-order").value = 1;
-        //                         document.getElementById('barcodeInput').focus();
-        //                     }
-        //                 } else {
-        //                     const newRow = document.createElement('tr');
-        //                     newRow.innerHTML = `
-        //                         <td class="text-center" style="width: 75px;">${scanLabel}</td>
-        //                         <td class="text-center" style="width: 200px;">${kode}</td>
-        //                         <td>${data.product.nama}/${data.product.unit_jual}</td>
-        //                         <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
-        //                         <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
-        //                         <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
-        //                         <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
-        //                     `;
-        //                     const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
-        //                     if (lastInsertedRow) {
-        //                         topTbody.insertBefore(newRow, lastInsertedRow);
-        //                     } else {
-        //                         topTbody.insertBefore(newRow, staticRow);
-        //                     }
-                            
-        //                     // update total harga
-        //                     grandTotal += displayHarga * inputOrder.value;
-        //                     grandDiskon += 0;
-        //                     grandTotalDiskon += displayHarga * inputOrder.value;
-        //                     document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
-        //                     document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
-        //                     document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
-        //                     document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
-
-        //                     productDetails.push({
-        //                         label: scanLabel,
-        //                         kode: data.product.kode,
-        //                         kode_alternatif: data.product.kode_alternatif,
-        //                         nama: data.product.nama + '/' + data.product.unit_jual,
-        //                         harga: displayHarga,
-        //                         order: displayOrder,
-        //                         total: inputOrder.value * displayHarga,
-        //                         diskon: 0,
-        //                         grand_total: displayHarga - 0
-        //                     });
-                            
-        //                     // Add the event listener in input
-        //                     document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
-        //                     barcodeValues.length = 0;
-        //                     document.getElementById("input-text").innerHTML = 1;
-        //                     document.getElementById("input-order").value = 1;
-        //                     document.getElementById('barcodeInput').focus();
-        //                 }
-                        
-        //                 if (scanLabel == 'RTN') {
-        //                     document.getElementById('label-cell').innerText = scanLabel;
-        //                     document.getElementById('barcodeInputReturn').focus();
-        //                 } else {
-        //                     document.getElementById('label-cell').innerText = 'PLU';
-        //                     document.getElementById('barcodeInput').focus();
-        //                 }
-        //             }
-        //         });
-        // }
-    // implementasi barcode
 
     // add otoritas, implementasi klik yang menggunakan otoritas
         let isPasswordVisible = false;
@@ -695,7 +604,7 @@
                 }
             }
             
-            if (event.key.toLowerCase() === '*') {
+            if (event.key.toLowerCase() === 'x') {
                 // Isi value input ke dalam elemen #input-text
                 const inputValue = input.value; // Ambil nilai yang ada di input
                 document.getElementById('input-text').innerHTML = inputValue; // Set value ke elemen input-text
@@ -845,6 +754,178 @@
         }
 
         // Fungsi untuk menangani event ketika tombol ditekan
+        // function handleKeyDown(event) {
+        //     const input = document.getElementById("barcode-input");
+        //     const barcode = input.value;
+
+        //     // Jika tombol 'Enter' ditekan dan ada nilai pada input
+        //     if (event.key === 'Enter' && barcode.length > 0) {
+        //         event.preventDefault();  // Mencegah form submit (jika berada dalam form)
+
+        //         // Panggil route untuk mendapatkan data produk berdasarkan barcode
+        //         fetch(`/get-detail-products/${barcode}`, {
+        //             method: 'GET',
+        //             headers: {
+        //                 'Content-Type': 'application/json'
+        //             }
+        //         })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.error) {
+        //                 alert(data.error);
+        //                 document.getElementById('barcode-input').value = '';
+        //                 document.getElementById('barcode-input').focus();
+        //             } else {
+        //                 const kode = document.getElementById('barcode-input').value;
+
+        //                 // cek bila ada harga sementara
+        //                 let hargaJual = data.product.harga_jual;
+        //                 var dateNow = @json($now);
+        //                 var hargaSementara = @json($hargaSementara);
+        //                 var hargaPertama = hargaSementara.find(function(harga) {
+        //                     return data.product.id == harga.id_product;
+        //                 });
+        //                 if (hargaPertama) {
+        //                     if (hargaPertama.date_first <= dateNow) {
+        //                         hargaJual = hargaPertama.harga_sementara;
+        //                     }
+        //                 }
+
+        //                 const scanLabel = document.getElementById('label-cell').innerHTML;
+        //                 const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
+        //                 const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder.value : inputOrder.value;
+
+        //                 const topTbody = document.querySelector('tbody.top');
+        //                 const staticRow = topTbody.querySelector('tr:first-child');
+                        
+        //                 if (scanLabel == 'VOD') {
+        //                     // cek apakah sudah ada data yang sama sebelumnya
+        //                     let kodeDitemukan = productDetails.some((data) => data.kode_alternatif === kode);
+        //                     let jumlahKurang = productDetails.some((data) => data.order >= inputOrder.value);
+
+        //                     if (!kodeDitemukan) {
+        //                         alert('DATA TIDAK DITEMUKAN!');
+                                
+        //                         barcodeValues.length = 0;
+        //                         document.getElementById("input-text").innerHTML = 1;
+        //                         document.getElementById("input-order").value = 1;
+        //                         document.getElementById('barcode-input').value = '';
+        //                         document.getElementById('label-cell').innerText = 'VOD';
+        //                     } else if (kodeDitemukan && !jumlahKurang) {
+        //                         alert('JUMLAH TIDAK BOLEH LEBIH BANYAK DARI DATA!');
+                                
+        //                         barcodeValues.length = 0;
+        //                         document.getElementById("input-text").innerHTML = 1;
+        //                         document.getElementById("input-order").value = 1;
+        //                         document.getElementById('barcode-input').value = '';
+        //                         document.getElementById('label-cell').innerText = 'VOD';
+        //                     } else {
+        //                         const newRow = document.createElement('tr');
+        //                         newRow.innerHTML = `
+        //                             <td class="text-center" style="width: 75px;">${scanLabel}</td>
+        //                             <td class="text-center" style="width: 200px;">${kode}</td>
+        //                             <td>${data.product.nama}/${data.product.unit_jual}</td>
+        //                             <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
+        //                             <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
+        //                             <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
+        //                             <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
+        //                         `;
+        //                         const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+        //                         if (lastInsertedRow) {
+        //                             topTbody.insertBefore(newRow, lastInsertedRow);
+        //                         } else {
+        //                             topTbody.insertBefore(newRow, staticRow);
+        //                         }
+                                
+        //                         // update total harga
+        //                         grandTotal += displayHarga * inputOrder.value;
+        //                         grandDiskon += 0;
+        //                         grandTotalDiskon += displayHarga * inputOrder.value;
+        //                         document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
+        //                         document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
+        //                         document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
+        //                         document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
+
+        //                         productDetails.push({
+        //                             label: scanLabel,
+        //                             kode: data.product.kode,
+        //                             kode_alternatif: data.product.kode_alternatif,
+        //                             nama: data.product.nama + '/' + data.product.unit_jual,
+        //                             harga: displayHarga,
+        //                             order: displayOrder,
+        //                             total: inputOrder.value * displayHarga,
+        //                             diskon: 0,
+        //                             grand_total: inputOrder.value * displayHarga
+        //                         });
+                                
+        //                         // Add the event listener in input
+        //                         document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
+        //                         barcodeValues.length = 0;
+        //                         document.getElementById("input-text").innerHTML = 1;
+        //                         document.getElementById("input-order").value = 1;
+        //                         document.getElementById('barcode-input').value = '';
+        //                         document.getElementById('label-cell').innerText = 'PLU';
+        //                     }
+        //                 } else {
+        //                     const newRow = document.createElement('tr');
+        //                     newRow.innerHTML = `
+        //                         <td class="text-center" style="width: 75px;">${scanLabel}</td>
+        //                         <td class="text-center" style="width: 200px;">${kode}</td>
+        //                         <td>${data.product.nama}/${data.product.unit_jual}</td>
+        //                         <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
+        //                         <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
+        //                         <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
+        //                         <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
+        //                     `;
+        //                     const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+        //                     if (lastInsertedRow) {
+        //                         topTbody.insertBefore(newRow, lastInsertedRow);
+        //                     } else {
+        //                         topTbody.insertBefore(newRow, staticRow);
+        //                     }
+                            
+        //                     // update total harga
+        //                     grandTotal += displayHarga * inputOrder.value;
+        //                     grandDiskon += 0;
+        //                     grandTotalDiskon += displayHarga * inputOrder.value;
+        //                     document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
+        //                     document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
+        //                     document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
+        //                     document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
+
+        //                     productDetails.push({
+        //                         label: scanLabel,
+        //                         kode: data.product.kode,
+        //                         kode_alternatif: data.product.kode_alternatif,
+        //                         nama: data.product.nama + '/' + data.product.unit_jual,
+        //                         harga: displayHarga,
+        //                         order: displayOrder,
+        //                         total: inputOrder.value * displayHarga,
+        //                         diskon: 0,
+        //                         grand_total: inputOrder.value * displayHarga
+        //                     });
+                            
+        //                     // Add the event listener in input
+        //                     document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
+        //                     barcodeValues.length = 0;
+        //                     document.getElementById("input-text").innerHTML = 1;
+        //                     document.getElementById("input-order").value = 1;
+        //                     document.getElementById('barcode-input').value = '';
+        //                 }
+                        
+        //                 if (scanLabel == 'RTN') {
+        //                     document.getElementById('label-cell').innerText = scanLabel;
+        //                     document.getElementById('barcode-input').value = '';
+        //                     document.getElementById('barcodeInputReturn').focus();
+        //                 }
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error('Error fetching product data:', error);
+        //         });
+        //     }
+        // }
+
         function handleKeyDown(event) {
             const input = document.getElementById("barcode-input");
             const barcode = input.value;
@@ -869,151 +950,162 @@
                     } else {
                         const kode = document.getElementById('barcode-input').value;
 
-                        // cek bila ada harga sementara
-                        let hargaJual = data.product.harga_jual;
-                        var dateNow = @json($now);
-                        var hargaSementara = @json($hargaSementara);
-                        var hargaPertama = hargaSementara.find(function(harga) {
-                            return data.product.id == harga.id_product;
-                        });
-                        if (hargaPertama) {
-                            if (hargaPertama.date_first <= dateNow) {
-                                hargaJual = hargaPertama.harga_sementara;
-                            }
-                        }
-
-                        const scanLabel = document.getElementById('label-cell').innerHTML;
-                        const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
-                        const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -inputOrder.value : inputOrder.value;
-
-                        const topTbody = document.querySelector('tbody.top');
-                        const staticRow = topTbody.querySelector('tr:first-child');
-                        
-                        if (scanLabel == 'VOD') {
-                            // cek apakah sudah ada data yang sama sebelumnya
-                            let kodeDitemukan = productDetails.some((data) => data.kode_alternatif === kode);
-                            let jumlahKurang = productDetails.some((data) => data.order >= inputOrder.value);
-
-                            if (!kodeDitemukan) {
-                                alert('DATA TIDAK DITEMUKAN!');
-                                
-                                barcodeValues.length = 0;
-                                document.getElementById("input-text").innerHTML = 1;
-                                document.getElementById("input-order").value = 1;
-                                document.getElementById('barcode-input').value = '';
-                                document.getElementById('label-cell').innerText = 'VOD';
-                            } else if (kodeDitemukan && !jumlahKurang) {
-                                alert('JUMLAH TIDAK BOLEH LEBIH BANYAK DARI DATA!');
-                                
-                                barcodeValues.length = 0;
-                                document.getElementById("input-text").innerHTML = 1;
-                                document.getElementById("input-order").value = 1;
-                                document.getElementById('barcode-input').value = '';
-                                document.getElementById('label-cell').innerText = 'VOD';
-                            } else {
-                                const newRow = document.createElement('tr');
-                                newRow.innerHTML = `
-                                    <td class="text-center" style="width: 75px;">${scanLabel}</td>
-                                    <td class="text-center" style="width: 200px;">${kode}</td>
-                                    <td>${data.product.nama}/${data.product.unit_jual}</td>
-                                    <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
-                                    <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
-                                    <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
-                                    <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
-                                `;
-                                const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
-                                if (lastInsertedRow) {
-                                    topTbody.insertBefore(newRow, lastInsertedRow);
-                                } else {
-                                    topTbody.insertBefore(newRow, staticRow);
-                                }
-                                
-                                // update total harga
-                                grandTotal += displayHarga * inputOrder.value;
-                                grandDiskon += 0;
-                                grandTotalDiskon += displayHarga * inputOrder.value;
-                                document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
-                                document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
-                                document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
-                                document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
-
-                                productDetails.push({
-                                    label: scanLabel,
-                                    kode: data.product.kode,
-                                    kode_alternatif: data.product.kode_alternatif,
-                                    nama: data.product.nama + '/' + data.product.unit_jual,
-                                    harga: displayHarga,
-                                    order: displayOrder,
-                                    total: inputOrder.value * displayHarga,
-                                    diskon: 0,
-                                    grand_total: inputOrder.value * displayHarga
-                                });
-                                
-                                // Add the event listener in input
-                                document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
-                                barcodeValues.length = 0;
-                                document.getElementById("input-text").innerHTML = 1;
-                                document.getElementById("input-order").value = 1;
-                                document.getElementById('barcode-input').value = '';
-                                document.getElementById('label-cell').innerText = 'PLU';
-                            }
+                        if (data.product.length > 1) {
+                            showProductChoiceModal(data.product);
                         } else {
-                            const newRow = document.createElement('tr');
-                            newRow.innerHTML = `
-                                <td class="text-center" style="width: 75px;">${scanLabel}</td>
-                                <td class="text-center" style="width: 200px;">${kode}</td>
-                                <td>${data.product.nama}/${data.product.unit_jual}</td>
-                                <td class="text-end" style="width: 100px;">${inputOrder.value}</td>
-                                <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
-                                <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
-                                <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * inputOrder.value)}</td>
-                            `;
-                            const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
-                            if (lastInsertedRow) {
-                                topTbody.insertBefore(newRow, lastInsertedRow);
-                            } else {
-                                topTbody.insertBefore(newRow, staticRow);
-                            }
-                            
-                            // update total harga
-                            grandTotal += displayHarga * inputOrder.value;
-                            grandDiskon += 0;
-                            grandTotalDiskon += displayHarga * inputOrder.value;
-                            document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
-                            document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
-                            document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
-                            document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
-
-                            productDetails.push({
-                                label: scanLabel,
-                                kode: data.product.kode,
-                                kode_alternatif: data.product.kode_alternatif,
-                                nama: data.product.nama + '/' + data.product.unit_jual,
-                                harga: displayHarga,
-                                order: displayOrder,
-                                total: inputOrder.value * displayHarga,
-                                diskon: 0,
-                                grand_total: inputOrder.value * displayHarga
-                            });
-                            
-                            // Add the event listener in input
-                            document.getElementById("big-name").innerHTML = data.product.nama + '/' + data.product.unit_jual;
-                            barcodeValues.length = 0;
-                            document.getElementById("input-text").innerHTML = 1;
-                            document.getElementById("input-order").value = 1;
-                            document.getElementById('barcode-input').value = '';
-                        }
-                        
-                        if (scanLabel == 'RTN') {
-                            document.getElementById('label-cell').innerText = scanLabel;
-                            document.getElementById('barcode-input').value = '';
-                            document.getElementById('barcodeInputReturn').focus();
+                            handleProductSelection(data.product[0]); // langsung isi row
                         }
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching product data:', error);
                 });
+            }
+        }
+
+        function showProductChoiceModal(products) {
+            const table = document.getElementById("productChoiceTable");
+            table.innerHTML = "";
+
+            // Buat header tabel
+            const thead = document.createElement("thead");
+            thead.innerHTML = `
+                <tr>
+                    <th>NAMA</th>
+                    <th>HARGA</th>
+                </tr>
+            `;
+            table.appendChild(thead);
+
+            // Buat tbody untuk data produk
+            const tbody = document.createElement("tbody");
+            
+            products.forEach((prod, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${prod.nama}/${prod.unit_jual}</td>
+                    <td>${number_format(prod.harga_jual)}</td>
+                `;
+                row.onclick = () => {
+                    closeProductModal();
+                    handleProductSelection(prod);
+                };
+                tbody.appendChild(row);
+            });
+
+            table.appendChild(tbody);
+
+            document.getElementById("productChoiceModal").style.display = "block";
+        }
+
+        function closeProductModal() {
+            document.getElementById("productChoiceModal").style.display = "none";
+        }
+
+        function handleProductSelection(product) {
+            const kode = product.kode_alternatif;
+            const nama = product.nama + '/' + product.unit_jual;
+            const scanLabel = document.getElementById('label-cell').innerText;
+            const inputOrder = document.getElementById("input-order");
+            const orderValue = parseInt(inputOrder.value) || 1;
+            const displayOrder = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -orderValue : orderValue;
+
+            // Cek harga sementara
+            let hargaJual = product.harga_jual;
+            var dateNow = @json($now);
+            var hargaSementara = @json($hargaSementara);
+            var hargaPertama = hargaSementara.find(harga => product.id == harga.id_product);
+            if (hargaPertama && hargaPertama.date_first <= dateNow) {
+                hargaJual = hargaPertama.harga_sementara;
+            }
+
+            const displayHarga = (scanLabel === 'VOD' || scanLabel === 'RTN') ? -hargaJual : hargaJual;
+            const topTbody = document.querySelector('tbody.top');
+            const staticRow = topTbody.querySelector('tr:first-child');
+
+            // === Handle khusus untuk label VOD ===
+            if (scanLabel === 'VOD') {
+                let namaDitemukan = productDetails.some((data) => data.nama === nama);
+                let kodeDitemukan = productDetails.some((data) => data.kode_alternatif === kode);
+                let jumlahKurang = productDetails.some((data) => data.order >= orderValue);
+
+                if (!kodeDitemukan) {
+                    alert('DATA TIDAK DITEMUKAN!');
+                    resetBarcodeInput('VOD');
+                    return;
+                }
+
+                if (!namaDitemukan) {
+                    alert('DATA TIDAK DITEMUKAN!');
+                    resetBarcodeInput('VOD');
+                    return;
+                }
+
+                if (kodeDitemukan && !jumlahKurang) {
+                    alert('JUMLAH TIDAK BOLEH LEBIH BANYAK DARI DATA!');
+                    resetBarcodeInput('VOD');
+                    return;
+                }
+
+                // Jika lolos validasi → lanjut tambah baris
+            }
+
+            // Tambah row baru
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td class="text-center" style="width: 75px;">${scanLabel}</td>
+                <td class="text-center" style="width: 200px;">${kode}</td>
+                <td>${product.nama}/${product.unit_jual}</td>
+                <td class="text-end" style="width: 100px;">${orderValue}</td>
+                <td class="text-end" style="width: 175px;">${number_format(displayHarga)}</td>
+                <td class="text-end" id="input-diskon" style="width: 175px;">0</td>
+                <td class="text-end" id="value-total" style="width: 175px;">${number_format(displayHarga * orderValue)}</td>
+            `;
+
+            const lastInsertedRow = topTbody.querySelector('tr:not(:first-child):last-child');
+            if (lastInsertedRow) {
+                topTbody.insertBefore(newRow, lastInsertedRow);
+            } else {
+                topTbody.insertBefore(newRow, staticRow);
+            }
+
+            // Update total harga
+            grandTotal += displayHarga * orderValue;
+            grandDiskon += 0;
+            grandTotalDiskon += displayHarga * orderValue;
+            document.getElementById("big-total").innerHTML = number_format(grandTotalDiskon);
+            document.getElementById("small-jumlah").innerHTML = number_format(grandTotal);
+            document.getElementById("small-diskon").innerHTML = number_format(grandDiskon);
+            document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
+
+            productDetails.push({
+                label: scanLabel,
+                kode: product.kode,
+                kode_alternatif: product.kode_alternatif,
+                nama: product.nama + '/' + product.unit_jual,
+                harga: displayHarga,
+                order: displayOrder,
+                total: orderValue * displayHarga,
+                diskon: 0,
+                grand_total: orderValue * displayHarga
+            });
+
+            // Set nama besar dan reset input
+            document.getElementById("big-name").innerHTML = product.nama + '/' + product.unit_jual;
+            resetBarcodeInput(scanLabel);
+        }
+
+        function resetBarcodeInput(label) {
+            barcodeValues.length = 0;
+            document.getElementById("input-text").innerHTML = 1;
+            document.getElementById("input-order").value = 1;
+            document.getElementById('barcode-input').value = '';
+
+            if (label === 'RTN') {
+                document.getElementById('label-cell').innerText = label;
+                document.getElementById('barcodeInputReturn').focus();
+            } else {
+                document.getElementById('label-cell').innerText = 'PLU';
             }
         }
     // implementasi klik yang tidak menggunakan otoritas
