@@ -69,7 +69,10 @@ Route::middleware('auth')->group(function () {
 
     // laporan kasir
     Route::get('/laporan-kasir', [HomeController::class, 'laporanKasir'])->name('laporan-kasir');
+    Route::get('/index-laporan-kasir-lokal', [HomeController::class, 'indexLaporanKasirLokal'])->name('index-laporan-kasir-lokal');
     Route::get('/index-laporan-kasir', [HomeController::class, 'indexLaporanKasir'])->name('index-laporan-kasir');
+    Route::post('/cetak-laporan-kasir-lokal', [HomeController::class, 'CetakLaporanKasirLokal'])->name('cetak-laporan-kasir-lokal');
+    Route::post('/cetak-laporan-kasir', [HomeController::class, 'CetakLaporanKasir'])->name('cetak-laporan-kasir');
 
     // end of day
     Route::get('/end-of-day', [HomeController::class, 'endOfDay'])->name('end-of-day');

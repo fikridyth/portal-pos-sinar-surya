@@ -8,13 +8,14 @@ use App\Models\HargaSementara;
 use App\Models\Hold;
 use App\Models\Penjualan;
 use App\Models\Product;
-use App\Models\ProductSecond;
-use App\Models\SupplierSecond;
 use App\Models\PengembalianSecond;
+use App\Models\PenjualanThird;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -825,9 +826,9 @@ class HomeController extends Controller
         return view('laporan-kasir', compact('title'));
     }
 
-    public function indexLaporanKasir()
+    public function indexLaporanKasirLokal()
     {
-        $title = 'Detail Laporan Kasir';
+        $title = 'Detail Laporan Kasir Lokal';
         $penjualans = Penjualan::get()
             ->groupBy('tanggal')
             ->map(function($items) {
@@ -841,8 +842,405 @@ class HomeController extends Controller
             });
         $totalHarga = $penjualans->sum('grand_total');
 
-        return view('index-laporan-kasir', compact('title', 'penjualans', 'totalHarga'));
+        return view('index-laporan-kasir-lokal', compact('title', 'penjualans', 'totalHarga'));
     }
+
+    public function CetakLaporanKasirLokal()
+    {
+        $penjualans = Penjualan::get()
+            ->groupBy('tanggal')
+            ->map(function ($items) {
+                $pluTotal = 0;
+                $vodTotal = 0;
+                $rtnTotal = 0;
+        
+                foreach ($items as $item) {
+                    // Pastikan detail sudah di-decode jadi array
+                    $details = is_string($item->detail) ? json_decode($item->detail, true) : $item->detail;
+        
+                    foreach ($details as $detail) {
+                        switch ($detail['label']) {
+                            case 'PLU':
+                                $pluTotal += $detail['total'];
+                                break;
+                            case 'VOD':
+                                $vodTotal += abs($detail['total']);  // ambil nilai absolut (positif)
+                                break;
+                            case 'RTN':
+                                $rtnTotal += abs($detail['total']);  // ambil nilai absolut (positif)
+                                break;
+                        }
+                    }
+                }
+        
+                return [
+                    'tanggal' => $items->pluck('tanggal')->first(),
+                    'created_by' => $items->pluck('created_by')->first(),
+                    'grand_total' => $items->sum('grand_total'),
+                    'diskon' => $items->sum('diskon'),
+                    'jam' => $items->max('jam'),
+                    'transaksi' => count($items),
+        
+                    // Tambahan per label
+                    'total' => $pluTotal,
+                    'void' => $vodTotal,
+                    'return' => $rtnTotal,
+                ];
+            });
+        $printData = $this->formatCetakKasirLokal($penjualans);
+
+        return response()->json(['printData' => $printData]);
+    }
+
+    private function formatCetakKasirLokal($penjualans)
+    {
+        // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
+        $output = "
+            <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            width: 58mm; 
+                            margin: 0; /* agar konten rapat ke kiri */
+                            padding: 20; /* supaya tidak ada jarak padding */
+                            text-align: left; /* pastikan teks rata kiri */
+                        }
+                        .separator { 
+                            margin-top: 5px; 
+                            border-top: 1px dashed black; 
+                        }
+                        .separator-second {
+                            margin-top: 5px; 
+                            margin-bottom: 5px; 
+                            border-top: 1px dashed black; 
+                        }
+                    </style>
+                </head>
+                <body>";
+
+        foreach ($penjualans as $penjualan) {
+            $output .= "<div>REKAP PENJUALAN TANGGAL : " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . "</div>";
+            $output .= "<div>POS NO : 01</div>";
+            $output .= "<div style='margin-top: 10px;'>";
+            $output .= "<div>KASIR : " . $penjualan['created_by'] . "</div>";
+            $output .= "<div>CUST : " . $penjualan['transaksi'] . "</div>";
+            $output .= "<div style='margin-top: 10px; width: 100%;'>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>PENJUALAN</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='margin-top: 10px; display: flex; justify-content: space-between;'>";
+            $output .= "<div>DISKON</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['diskon'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>RETUR</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['return'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>VOID</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['void'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='margin-top: 10px;' class='separator'></div>";
+
+            $output .= "<div style='margin-top: 5px; display: flex; justify-content: space-between;'>";
+            $output .= "<div>SUBTOTAL</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['grand_total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div class='separator'></div>";
+
+            $output .= "<div style='margin-top: 15px;' class='separator'></div>";
+            $output .= "<div class='separator-second'></div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>TOTAL</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['grand_total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div class='separator'></div>";
+            $output .= "<div class='separator-second'></div>";
+
+            $output .= "</div>";
+        }
+
+        $output .= "</body>
+            </html>";
+        return $output;
+    }    
+
+    public function indexLaporanKasir()
+    {
+        $title = 'Detail Laporan Kasir Network';
+        $penjualans = Penjualan::get()
+            ->groupBy('tanggal')
+            ->map(function($items) {
+                return [
+                    'tanggal' => $items->pluck('tanggal')->first(),
+                    'created_by' => $items->pluck('created_by')->first(),
+                    'grand_total' => $items->sum('grand_total'),
+                    'jam' => $items->max('jam'),
+                    'transaksi' => count($items),
+                ];
+            });
+        $totalHarga = $penjualans->sum('grand_total');
+
+        try {
+            // Cek koneksi ke database client
+            DB::connection('mysql_third')->getPdo();
+
+            $penjualansThird = PenjualanThird::get()
+            ->groupBy('tanggal')
+            ->map(function($items) {
+                return [
+                    'tanggal' => $items->pluck('tanggal')->first(),
+                    'created_by' => $items->pluck('created_by')->first(),
+                    'grand_total' => $items->sum('grand_total'),
+                    'jam' => $items->max('jam'),
+                    'transaksi' => count($items),
+                ];
+            });
+            $totalHargaThird = $penjualansThird->sum('grand_total');
+        } catch (\PDOException $e) {
+            Log::error("Koneksi ke mysql_third gagal: " . $e->getMessage());
+            $penjualansThird = collect();
+            $totalHargaThird = 0;
+        }
+
+        return view('index-laporan-kasir', compact('title', 'penjualans', 'totalHarga', 'penjualansThird', 'totalHargaThird'));
+    }
+
+    
+
+    public function CetakLaporanKasir()
+    {
+        $penjualans = Penjualan::get()
+            ->groupBy('tanggal')
+            ->map(function ($items) {
+                $pluTotal = 0;
+                $vodTotal = 0;
+                $rtnTotal = 0;
+        
+                foreach ($items as $item) {
+                    // Pastikan detail sudah di-decode jadi array
+                    $details = is_string($item->detail) ? json_decode($item->detail, true) : $item->detail;
+        
+                    foreach ($details as $detail) {
+                        switch ($detail['label']) {
+                            case 'PLU':
+                                $pluTotal += $detail['total'];
+                                break;
+                            case 'VOD':
+                                $vodTotal += abs($detail['total']);  // ambil nilai absolut (positif)
+                                break;
+                            case 'RTN':
+                                $rtnTotal += abs($detail['total']);  // ambil nilai absolut (positif)
+                                break;
+                        }
+                    }
+                }
+        
+                return [
+                    'tanggal' => $items->pluck('tanggal')->first(),
+                    'created_by' => $items->pluck('created_by')->first(),
+                    'grand_total' => $items->sum('grand_total'),
+                    'diskon' => $items->sum('diskon'),
+                    'jam' => $items->max('jam'),
+                    'transaksi' => count($items),
+        
+                    // Tambahan per label
+                    'total' => $pluTotal,
+                    'void' => $vodTotal,
+                    'return' => $rtnTotal,
+                ];
+            });
+
+            
+        $penjualansDua = PenjualanThird::get()
+            ->groupBy('tanggal')
+            ->map(function ($items) {
+                $pluTotal = 0;
+                $vodTotal = 0;
+                $rtnTotal = 0;
+        
+                foreach ($items as $item) {
+                    // Pastikan detail sudah di-decode jadi array
+                    $details = is_string($item->detail) ? json_decode($item->detail, true) : $item->detail;
+        
+                    foreach ($details as $detail) {
+                        switch ($detail['label']) {
+                            case 'PLU':
+                                $pluTotal += $detail['total'];
+                                break;
+                            case 'VOD':
+                                $vodTotal += abs($detail['total']);  // ambil nilai absolut (positif)
+                                break;
+                            case 'RTN':
+                                $rtnTotal += abs($detail['total']);  // ambil nilai absolut (positif)
+                                break;
+                        }
+                    }
+                }
+        
+                return [
+                    'tanggal' => $items->pluck('tanggal')->first(),
+                    'created_by' => $items->pluck('created_by')->first(),
+                    'grand_total' => $items->sum('grand_total'),
+                    'diskon' => $items->sum('diskon'),
+                    'jam' => $items->max('jam'),
+                    'transaksi' => count($items),
+        
+                    // Tambahan per label
+                    'total' => $pluTotal,
+                    'void' => $vodTotal,
+                    'return' => $rtnTotal,
+                ];
+            });
+        $printData = $this->formatCetakKasir($penjualans, $penjualansDua);
+
+        return response()->json(['printData' => $printData]);
+    }
+
+    private function formatCetakKasir($penjualans, $penjualansDua)
+    {
+        // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
+        $output = "
+            <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            width: 58mm; 
+                            margin: 0; /* agar konten rapat ke kiri */
+                            padding: 20; /* supaya tidak ada jarak padding */
+                            text-align: left; /* pastikan teks rata kiri */
+                        }
+                        .separator { 
+                            margin-top: 5px; 
+                            border-top: 1px dashed black; 
+                        }
+                        .separator-second {
+                            margin-top: 5px; 
+                            margin-bottom: 5px; 
+                            border-top: 1px dashed black; 
+                        }
+                    </style>
+                </head>
+                <body>";
+
+        foreach ($penjualans as $penjualan) {
+            $output .= "<div>REKAP PENJUALAN TANGGAL : " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . "</div>";
+            $output .= "<div>POS NO : 01</div>";
+            $output .= "<div style='margin-top: 10px;'>";
+            $output .= "<div>KASIR : " . $penjualan['created_by'] . "</div>";
+            $output .= "<div>CUST : " . $penjualan['transaksi'] . "</div>";
+            $output .= "<div style='margin-top: 10px; width: 100%;'>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>PENJUALAN</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='margin-top: 10px; display: flex; justify-content: space-between;'>";
+            $output .= "<div>DISKON</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['diskon'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>RETUR</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['return'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>VOID</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['void'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='margin-top: 10px;' class='separator'></div>";
+
+            $output .= "<div style='margin-top: 5px; display: flex; justify-content: space-between;'>";
+            $output .= "<div>SUBTOTAL</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['grand_total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div class='separator'></div>";
+
+            $output .= "<div style='margin-top: 15px;' class='separator'></div>";
+            $output .= "<div class='separator-second'></div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>TOTAL</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['grand_total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div class='separator'></div>";
+            $output .= "<div class='separator-second'></div>";
+
+            $output .= "</div>";
+        }
+
+        foreach ($penjualansDua as $penjualan) {
+            $output .= "<div style='margin-top: 80px;'>";
+            $output .= "<div>REKAP PENJUALAN TANGGAL : " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . "</div>";
+            $output .= "<div>POS NO : 02</div>";
+            $output .= "<div style='margin-top: 10px;'>";
+            $output .= "<div>KASIR : " . $penjualan['created_by'] . "</div>";
+            $output .= "<div>CUST : " . $penjualan['transaksi'] . "</div>";
+            $output .= "<div style='margin-top: 10px; width: 100%;'>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>PENJUALAN</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='margin-top: 10px; display: flex; justify-content: space-between;'>";
+            $output .= "<div>DISKON</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['diskon'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>RETUR</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['return'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>VOID</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['void'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div style='margin-top: 10px;' class='separator'></div>";
+
+            $output .= "<div style='margin-top: 5px; display: flex; justify-content: space-between;'>";
+            $output .= "<div>SUBTOTAL</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['grand_total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div class='separator'></div>";
+
+            $output .= "<div style='margin-top: 15px;' class='separator'></div>";
+            $output .= "<div class='separator-second'></div>";
+
+            $output .= "<div style='display: flex; justify-content: space-between;'>";
+            $output .= "<div>TOTAL</div>";
+            $output .= "<div style='text-align: right; min-width: 100px;'>" . number_format($penjualan['grand_total'], 0) . "</div>";
+            $output .= "</div>";
+
+            $output .= "<div class='separator'></div>";
+            $output .= "<div class='separator-second'></div>";
+
+            $output .= "</div>";
+        }
+
+        $output .= "</body>
+            </html>";
+        return $output;
+    }   
 
     public function endOfDay()
     {

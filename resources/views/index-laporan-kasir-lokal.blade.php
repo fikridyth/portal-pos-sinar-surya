@@ -65,16 +65,6 @@
                                     <td class="text-black text-end">{{ number_format($jual['grand_total']) }}</td>
                                 </tr>
                             @endforeach
-                            @foreach ($penjualansThird as $jualThird)
-                                <tr>
-                                    <td class="text-black text-center">02</td>
-                                    <td class="text-black">{{ $jualThird['created_by'] }}</td>
-                                    <td class="text-black text-center">{{ $jualThird['tanggal'] }}</td>
-                                    <td class="text-black text-center">{{ $jualThird['jam'] }}</td>
-                                    <td class="text-black text-end">{{ $jualThird['transaksi'] }}</td>
-                                    <td class="text-black text-end">{{ number_format($jualThird['grand_total']) }}</td>
-                                </tr>
-                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -83,10 +73,10 @@
                 style="color: white; border: 2px solid white; border-top: none; margin-top: 25px; background-color: gray;">
                     <p style="margin-left: 8%;"></p>
                     <div>
-                        <a href="#" id="cetak-kasir" class="btn btn-dark mx-2" style="width: 200px;">F12 - CETAK REKAP</a>
+                        <a href="#" id="cetak-kasir-lokal" class="btn btn-dark mx-2" style="width: 200px;">F12 - CETAK REKAP</a>
                         <a href="/" class="btn btn-dark mx-2" style="width: 200px;">F2 - SELESAI</a>
                     </div>
-                    <input type="text" size="15" class="text-end" style="background-color: black; color: white; font-size: 18px;" value="{{ number_format($totalHarga + $totalHargaThird) }}">
+                    <input type="text" size="15" class="text-end" style="background-color: black; color: white; font-size: 18px;" value="{{ number_format($totalHarga) }}">
             </div>
         </div>
     </div>
@@ -94,13 +84,12 @@
 
 @section('scripts')
     <script>
-        
-        function cetakRekapKasir() {
-            const button = document.getElementById('cetak-kasir');
+        function cetakRekapKasirLokal() {
+            const button = document.getElementById('cetak-kasir-lokal');
             button.innerText = 'MEMPROSES...';
             button.classList.add('disabled');
 
-            fetch('/cetak-laporan-kasir', {
+            fetch('/cetak-laporan-kasir-lokal', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -126,9 +115,9 @@
             });
         }
 
-        document.getElementById('cetak-kasir').addEventListener('click', function (e) {
+        document.getElementById('cetak-kasir-lokal').addEventListener('click', function (e) {
             e.preventDefault();
-            cetakRekapKasir();
+            cetakRekapKasirLokal();
         });
 
         document.addEventListener('keydown', function(event) {
@@ -138,7 +127,7 @@
             }
             if (event.key === 'F12') {
                 event.preventDefault();
-                cetakRekapKasir();
+                cetakRekapKasirLokal();
             }
         });
 

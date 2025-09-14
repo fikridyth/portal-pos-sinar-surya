@@ -21,7 +21,11 @@
 @section('scripts')
     <script>
         document.addEventListener('keydown', function(event) {
-            if (event.key === 'l' || event.key === 'L' || event.key === 'n' || event.key === 'N') {
+            if (event.key === 'l' || event.key === 'L') {
+                event.preventDefault();
+                window.location.href = '/index-laporan-kasir-lokal';
+            }
+            if (event.key === 'n' || event.key === 'N') {
                 event.preventDefault();
                 window.location.href = '/index-laporan-kasir';
             }
