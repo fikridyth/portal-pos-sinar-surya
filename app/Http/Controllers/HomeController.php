@@ -365,7 +365,7 @@ class HomeController extends Controller
         $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
         $output .= "<span class='total'>QTY: " . array_sum(array_column($products, 'order')) . "</span>";
         $output .= "</div>";
-        $output .= "<div class='header total' style='margin-top: 10px;'>(## REPRINT ##)</div>";
+        $output .= "<div class='header total' style='margin-top: 10px;'>(** REPRINT **)</div>";
         $output .= "<div class='separator'></div>";
         $output .= "<div class='separator-second'></div>
                 </body>
@@ -430,8 +430,10 @@ class HomeController extends Controller
     public function listBarangSupplier(ProductDataTable $dataTable, $id)
     {
         $title = 'List Barang';
+        $now = now()->format('Y-m-d');
+        $hargaSementara = HargaSementara::where('date_first', '<=', $now)->orderBy('date_first', 'desc')->get();
 
-        return $dataTable->render('list-barang-supplier', compact('title', 'id'));
+        return $dataTable->render('list-barang-supplier', compact('title', 'id', 'now', 'hargaSementara'));
     }
 
     // supplier

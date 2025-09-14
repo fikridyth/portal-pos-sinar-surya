@@ -643,11 +643,11 @@
                 newRow.innerHTML = `
                     <td class="text-center" style="width: 75px;">${data.label}</td>
                     <td class="text-center" style="width: 200px;">${data.kode_alternatif !== null && data.kode_alternatif !== undefined ? data.kode_alternatif : ''}</td>
-                    <td>${data.nama}</td>
+                    <td>${data.nama}/${data.unit_jual}</td>
                     <td class="text-end" style="width: 100px;">${data.order}</td>
-                    <td class="text-end" style="width: 175px;">${number_format(data.harga)}</td>
-                    <td class="text-end" style="width: 175px;" id="input-diskon">${number_format(data.diskon)}</td>
-                    <td class="text-end" style="width: 175px;" id="value-total">${number_format(data.grand_total)}</td>
+                    <td class="text-end" style="width: 175px;">${number_format(data.price)}</td>
+                    <td class="text-end" style="width: 175px;" id="input-diskon">${number_format(data.diskon1)}</td>
+                    <td class="text-end" style="width: 175px;" id="value-total">${number_format(data.field_total)}</td>
                 `;
                 topTbody.insertBefore(newRow, staticRow);
                 if (data.label == 'RTN') {
@@ -747,13 +747,14 @@
             // search product - menggunakan local storage untuk menyimpan data sementara
             if (event.key === 'F11') {
                 event.preventDefault();
-                // localStorage.setItem('productDetails', JSON.stringify(productDetails));
-                // localStorage.setItem('grandTotal', grandTotal);
-                // localStorage.setItem('grandDiskon', grandDiskon);
-                // localStorage.setItem('grandTotalDiskon', grandTotalDiskon);
-                // localStorage.setItem('inputOrder', inputOrder.value);
-                // localStorage.setItem('scanLabel', document.getElementById('label-cell').innerText);
-                // window.location.href = '/list-barang';
+                const id = {{ $id }};
+                localStorage.setItem('productDetails', JSON.stringify(productDetails));
+                localStorage.setItem('grandTotal', grandTotal);
+                localStorage.setItem('grandDiskon', grandDiskon);
+                localStorage.setItem('grandTotalDiskon', grandTotalDiskon);
+                localStorage.setItem('inputOrder', inputOrder.value);
+                localStorage.setItem('scanLabel', document.getElementById('label-cell').innerText);
+                window.location.href = `/list-barang-supplier/${id}`;
             }
 
             // kirim data dengan fetch
@@ -985,6 +986,7 @@
                             document.getElementById("small-total").innerHTML = number_format(grandTotalDiskon);
 
                             productDetails.push({
+                                label: "PLU",
                                 kode: data.product.kode,
                                 kode_alternatif: data.product.kode_alternatif,
                                 nama: data.product.nama,

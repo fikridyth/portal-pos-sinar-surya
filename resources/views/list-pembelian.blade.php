@@ -45,7 +45,7 @@
                                     <td class="text-center text-black">{{ $penjualan->created_by }}</td>
                                     <td class="text-center text-black">{{ $penjualan->no }}</td>
                                     <td class="text-center text-black">{{ $penjualan->jam }}</td>
-                                    <td class="text-center text-black"><input type="checkbox" class="preorder-checkbox" data-total="{{ $penjualan->grand_total }}" data-detail="{{ json_encode($penjualan->detail) }}"></td>
+                                    <td class="text-center text-black"><input type="checkbox" class="preorder-checkbox" data-total="{{ $penjualan->grand_total }}" data-id ="{{ $penjualan->id }}" data-detail="{{ json_encode($penjualan->detail) }}"></td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -92,21 +92,27 @@
 
 @section('scripts')
     <script>
+        let activeCheckbox = null;
+        let activeDetail = null;
+        let activeDataId = null;
+
         document.querySelectorAll('.preorder-checkbox').forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const detail = JSON.parse(this.getAttribute('data-detail'));
+                const dataId = JSON.parse(this.getAttribute('data-id'));
                 const grandTotal = JSON.parse(this.getAttribute('data-total'));
                 const tbody = document.getElementById('orderDetailTableBody');
                 const totalCell = document.querySelector('.table tbody tr th.value-total');
                 
-                if (this.checked) {
-                    document.querySelectorAll('.preorder-checkbox').forEach(otherCheckbox => {
-                        if (otherCheckbox !== this) {
-                            otherCheckbox.disabled = true;
-                        }
-                    });
+                document.querySelectorAll('.preorder-checkbox').forEach(otherCheckbox => {
+                    if (otherCheckbox !== this) {
+                        otherCheckbox.checked = false;
+                    }
+                });
 
+                if (this.checked) {
                     tbody.innerHTML = '';
+                    let enableKarton = false;
                     JSON.parse(detail).forEach(item => {
                         // console.log(item);
                         const newRow = document.createElement('tr');
@@ -118,13 +124,34 @@
                             <td class="text-end text-black" style="width: 100px;">${number_format(item.grand_total)}</td>
                         `;
                         tbody.appendChild(newRow);
+                        const match = item.nama.match(/\/P(\d+)$/);
+                        if (match && parseInt(match[1], 10) > 1) {
+                            enableKarton = true;
+                        }
                     });
+
+
+                    const linkKarton = document.getElementById('linkKarton');
+                    if (enableKarton) {
+                        linkKarton.classList.remove('disabled');
+                        linkKarton.style.pointerEvents = 'auto';
+                        linkKarton.style.opacity = '1';
+                    } else {
+                        linkKarton.classList.add('disabled');
+                        linkKarton.style.pointerEvents = 'none'; // Ini benar-benar memblok klik
+                        linkKarton.style.opacity = '0.5'; // Untuk efek visual
+                    }
 
                     totalCell.textContent = number_format(grandTotal);
                     const currentCheckbox = this;
                     const currentDetail = detail;
+                    
+                    activeCheckbox = this;
+                    activeDetail = detail;
+                    activeDataId = dataId;
 
                     document.addEventListener('keydown', function(event) {
+                        if (!activeCheckbox) return;
                         if (event.key === 'c' || event.key === 'C') {
                             event.preventDefault();
                             const id = currentCheckbox.closest('tr').dataset.id;
@@ -136,7 +163,7 @@
                                     'Content-Type': 'application/json',
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
                                 },
-                                body: JSON.stringify({ id: id, detail: currentDetail })
+                                body: JSON.stringify({ id: activeDataId, detail: activeDetail })
                             })
                             .then(response => response.json())
                             .then(data => {
@@ -148,6 +175,7 @@
 
                     document.getElementById('linkKarton').addEventListener('click', function(event) {
                         event.preventDefault(); // Prevent default action of the link
+                        if (!activeCheckbox) return;
                         const id = currentCheckbox.closest('tr').dataset.id;
 
                         // AJAX request to your server
@@ -157,7 +185,7 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
                             },
-                            body: JSON.stringify({ id: id, detail: currentDetail })
+                            body: JSON.stringify({ id: activeDataId, detail: activeDetail })
                         })
                         .then(response => response.json())
                         .then(data => {
@@ -167,6 +195,7 @@
                     });
 
                     document.addEventListener('keydown', function(event) {
+                        if (!activeCheckbox) return;
                         if (event.key === 'v' || event.key === 'V') {
                             event.preventDefault();
                             const id = currentCheckbox.closest('tr').dataset.id;
@@ -178,7 +207,7 @@
                                     'Content-Type': 'application/json',
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
                                 },
-                                body: JSON.stringify({ id: id, detail: currentDetail })
+                                body: JSON.stringify({ id: activeDataId, detail: activeDetail })
                             })
                             .then(response => response.json())
                             .then(data => {
@@ -190,6 +219,7 @@
 
                     document.getElementById('linkPilih').addEventListener('click', function(event) {
                         event.preventDefault(); // Prevent default action of the link
+                        if (!activeCheckbox) return;
                         const id = currentCheckbox.closest('tr').dataset.id;
 
                         // AJAX request to your server
@@ -199,7 +229,7 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
                             },
-                            body: JSON.stringify({ id: id, detail: currentDetail })
+                            body: JSON.stringify({ id: activeDataId, detail: activeDetail })
                         })
                         .then(response => response.json())
                         .then(data => {
@@ -208,12 +238,12 @@
                         .catch(error => console.error('Error:', error));
                     });
                 } else {
-                    document.querySelectorAll('.preorder-checkbox').forEach(otherCheckbox => {
-                        otherCheckbox.disabled = false;
-                    });
-
                     tbody.innerHTML = '';
                     totalCell.textContent = '0';
+
+                    activeCheckbox = null;
+                    activeDetail = null;
+                    activeDataId = null;
                 }
             });
 

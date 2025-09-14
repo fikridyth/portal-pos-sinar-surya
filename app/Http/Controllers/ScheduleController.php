@@ -116,7 +116,7 @@ class ScheduleController extends Controller
                         $productServer = ProductSecond::where('kode', $kode)->first();
                         $productServer->update(['stok' => $productServer->stok - $order]);
                     } catch (\PDOException $e) {
-                        return response()->json(['success' => false, 'message' => 'Data gagal dikirim ke server!', 'data' => $allProducts], 200);
+                        return response()->json(['success' => false, 'message' => 'Data gagal dikirim ke server!', 'data' => []], 200);
                     }
 
                     // buat array untuk update product stock

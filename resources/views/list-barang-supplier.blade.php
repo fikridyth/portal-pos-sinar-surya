@@ -61,14 +61,15 @@
                     const link = event.target; // Reference to the clicked link
 
                     const newProductDetails = {
+                        label: "PLU",
                         kode: link.getAttribute('data-kode'),
                         kode_alternatif: link.getAttribute('data-kode-alternatif'),
                         nama: link.getAttribute('data-nama'),
                         unit_jual: link.getAttribute('data-unit-jual'),
                         stok: link.getAttribute('data-stok'),
                         order: inputOrder,
-                        price: parseFloat(link.getAttribute('data-harga-pokok')),
-                        field_total: parseFloat(link.getAttribute('data-harga-pokok') * inputOrder),
+                        price: parseFloat(link.getAttribute('data-harga-jual')),
+                        field_total: parseFloat(link.getAttribute('data-harga-jual') * inputOrder),
                         kode_sumber: link.getAttribute('data-kode-sumber'),
                         diskon1: 0,
                         diskon2: 0,
@@ -80,7 +81,7 @@
                         is_ppn: 0,
                     };
                     productDetails.push(newProductDetails);
-                    grandTotal += Number(link.getAttribute('data-harga-pokok') * inputOrder);
+                    grandTotal += Number(link.getAttribute('data-harga-jual') * inputOrder);
 
                     // Store product details in localStorage
                     localStorage.setItem('productDetails', JSON.stringify(productDetails));
