@@ -108,6 +108,7 @@ class HomeController extends Controller
     {
         // dd($products);
         // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
+        $kasirName = auth()->user()->name;
         $output = "
             <html>
                 <head>
@@ -134,6 +135,13 @@ class HomeController extends Controller
                         .product-item { 
                             display: flex; 
                             justify-content: space-between; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .addon-item { 
+                            display: flex; 
+                            justify-content: start; 
                             margin-top: 2px; 
                             margin-bottom: 2px; 
                             font-size: 10px; 
@@ -236,28 +244,102 @@ class HomeController extends Controller
         // Pisahkan data VOD dan RTN
         $vodItems = array_filter($products, fn($item) => $item['label'] === 'VOD');
         $rtnItems = array_filter($products, fn($item) => $item['label'] === 'RTN');
+        $discItems = array_filter($products, fn($item) => $item['diskon'] != 0);
 
-        if (!empty($vodItems) || !empty($rtnItems)) {
-            $output .= "<div style='margin-top: 80px;'></div>";
-            $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
-            // VOD section
-            if (!empty($vodItems)) {
-                $output .= "<div style='margin-top: 8px; font-weight: bold;'>VOID</div>";
-                foreach ($vodItems as $item) {
+        // VOD section
+        if (!empty($vodItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>VOID</span>";
+            $output .= "<span style='margin-left: 10px;'>: AMIN 999999</span>";
+            $output .= "</div>";
+            foreach ($vodItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] == -1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] < -1) {
                     $output .= "<div class='product-item'>";
-                    $output .= "<span>{$item['nama']}</span>";
-                    $output .= "<span>" . number_format($item['grand_total'], 0, ',', '.') . "</span>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
                     $output .= "</div>";
                 }
             }
+        }
 
-            // RTN section
-            if (!empty($rtnItems)) {
-                $output .= "<div style='margin-top: 8px; font-weight: bold;'>RETURN</div>";
-                foreach ($rtnItems as $item) {
+        // RTN section
+        if (!empty($rtnItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>RETUR</span>";
+            $output .= "<span style='margin-left: 5px;'>: AMIN 999999</span>";
+            $output .= "</div>";
+            foreach ($rtnItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] == -1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] < -1) {
                     $output .= "<div class='product-item'>";
-                    $output .= "<span>{$item['nama']}</span>";
-                    $output .= "<span>" . number_format($item['grand_total'], 0, ',', '.') . "</span>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+        }
+
+        // Discount Section
+        if (!empty($discItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span style='margin-left: 3px;'>: HARYANTO</span>";
+            $output .= "</div>";
+            foreach ($discItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] <= 1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] > 1) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
                     $output .= "</div>";
                 }
             }
@@ -337,6 +419,13 @@ class HomeController extends Controller
                             margin-bottom: 2px; 
                             font-size: 10px; 
                         }
+                        .qty-item { 
+                            display: flex; 
+                            justify-content: center; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
                         .total { 
                             margin-top: 8px; 
                             font-weight: bold; 
@@ -396,41 +485,17 @@ class HomeController extends Controller
         }
         
         $output .= "<div class='separator'></div>";
-        $output .= "<div class='product-item' style='margin-top: 7px;'>";
+        $output .= "<div class='product-item' style='margin-top: 2px;'>";
         $output .= "<span>TOTAL</span>";
-        $output .= "<span>" . number_format($penjualan['total'], 0, ',', '.') . "</span>";
+        $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
         $output .= "</div>";
-        if ($penjualan['payment'] !== 0) {
-            $output .= "<div class='product-item' style='margin-top: 2px;'>";
-            $output .= "<span>DISKON</span>";
-            $output .= "<span>" . number_format($penjualan['diskon'], 0, ',', '.') . "</span>";
-            $output .= "</div>";
-            $output .= "<div class='product-item' style='margin-top: 2px;'>";
-            $output .= "<span>TENDER 01</span>";
-            $output .= "<span>" . number_format($penjualan['payment'], 0, ',', '.') . "</span>";
-            $output .= "</div>";
-            $output .= "<div class='product-item' style='margin-top: 2px;'>";
-            $output .= "<span>KEMBALI</span>";
-            $output .= "<span>" . number_format($penjualan['return'], 0, ',', '.') . "</span>";
-            $output .= "</div>";
-        } else {
-            $output .= "<div class='product-item' style='margin-top: 2px;'>";
-            $output .= "<span>DISKON</span>";
-            $output .= "<span>" . number_format($penjualan['diskon'], 0, ',', '.') . "</span>";
-            $output .= "</div>";
-            $output .= "<div class='product-item' style='margin-top: 2px;'>";
-            $output .= "<span>TENDER 01</span>";
-            $output .= "<span>" . number_format($penjualan['grand_total'], 0, ',', '.') . "</span>";
-            $output .= "</div>";
-        }
-        $output .= "<div class='product-item'>";
-        $output .= "<span class='total'>" . auth()->user()->name . "</span>";
-        $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
-        $output .= "<span class='total'>QTY: " . array_sum(array_column($products, 'order')) . "</span>";
+        $output .= "<div class='qty-item' style='margin-top: 7px;'>";
+        $output .= "<span>QTY :</span>";
+        $output .= "<span style='margin-left: 10px;'>" . array_sum(array_column($products, 'order')) . "</span>";
         $output .= "</div>";
-        $output .= "<div class='header total' style='margin-top: 10px;'>(** ALL VOID **)</div>";
-        $output .= "<div class='separator'></div>";
-        $output .= "<div class='separator-second'></div>
+        $output .= "<div class='separator' style='margin-top: 15px; margin-bottom: -5px;'></div>";
+        $output .= "<div class='header total' style='margin-top: 10px;'>ALL VOID</div>";
+        $output .= "<div class='separator' style='margin-top: -5px;'></div>
                 </body>
             </html>";
         return $output;
@@ -445,28 +510,10 @@ class HomeController extends Controller
         return response()->json(['printData' => $printData]);
     }
 
-    public function ReprintPembelianKarton(Request $request)
-    {
-        $penjualan = Penjualan::find($request->id);
-        $products = json_decode($request->input('detail'), true);
-        $productCartons = [];
-        foreach ($products as $product) {
-            $nama = $product['nama'];
-            $parts = explode('P', $nama);
-            $getNumber = end($parts);
-
-            if ((int)$getNumber > 1) {
-                $productCartons[] = $product;
-            }
-        }
-        $printData = $this->formatReprintData($penjualan, $productCartons);
-
-        return response()->json(['printData' => $printData]);
-    }
-
     private function formatReprintData($penjualan, $products)
     {
         // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
+        $kasirName = auth()->user()->name;
         $output = "
             <html>
                 <head>
@@ -493,6 +540,13 @@ class HomeController extends Controller
                         .product-item { 
                             display: flex; 
                             justify-content: space-between; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .addon-item { 
+                            display: flex; 
+                            justify-content: start; 
                             margin-top: 2px; 
                             margin-bottom: 2px; 
                             font-size: 10px; 
@@ -594,28 +648,342 @@ class HomeController extends Controller
         // Pisahkan data VOD dan RTN
         $vodItems = array_filter($products, fn($item) => $item['label'] === 'VOD');
         $rtnItems = array_filter($products, fn($item) => $item['label'] === 'RTN');
+        $discItems = array_filter($products, fn($item) => $item['diskon'] != 0);
 
-        if (!empty($vodItems) || !empty($rtnItems)) {
-            $output .= "<div style='margin-top: 80px;'></div>";
-            $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
-            // VOD section
-            if (!empty($vodItems)) {
-                $output .= "<div style='margin-top: 8px; font-weight: bold;'>VOID</div>";
-                foreach ($vodItems as $item) {
+        // VOD section
+        if (!empty($vodItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>VOID</span>";
+            $output .= "<span style='margin-left: 10px;'>: AMIN 999999</span>";
+            $output .= "</div>";
+            foreach ($vodItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] == -1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] < -1) {
                     $output .= "<div class='product-item'>";
-                    $output .= "<span>{$item['nama']}</span>";
-                    $output .= "<span>" . number_format($item['grand_total'], 0, ',', '.') . "</span>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
                     $output .= "</div>";
                 }
             }
+        }
 
-            // RTN section
-            if (!empty($rtnItems)) {
-                $output .= "<div style='margin-top: 8px; font-weight: bold;'>RETURN</div>";
-                foreach ($rtnItems as $item) {
+        // RTN section
+        if (!empty($rtnItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>RETUR</span>";
+            $output .= "<span style='margin-left: 5px;'>: AMIN 999999</span>";
+            $output .= "</div>";
+            foreach ($rtnItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] == -1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] < -1) {
                     $output .= "<div class='product-item'>";
-                    $output .= "<span>{$item['nama']}</span>";
-                    $output .= "<span>" . number_format($item['grand_total'], 0, ',', '.') . "</span>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+        }
+
+        // Discount Section
+        if (!empty($discItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span style='margin-left: 3px;'>: HARYANTO</span>";
+            $output .= "</div>";
+            foreach ($discItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] <= 1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] > 1) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+        }
+
+        $output .= "</body>
+            </html>";
+        return $output;
+    }    
+
+    public function ReprintPembelianKarton(Request $request)
+    {
+        $penjualan = Penjualan::find($request->id);
+        $products = json_decode($request->input('detail'), true);
+        $productCartons = [];
+        foreach ($products as $product) {
+            $nama = $product['nama'];
+            $parts = explode('P', $nama);
+            $getNumber = end($parts);
+
+            if ((int)$getNumber > 1) {
+                $productCartons[] = $product;
+            }
+        }
+        $printData = $this->formatReprintDataKarton($penjualan, $productCartons);
+
+        return response()->json(['printData' => $printData]);
+    }
+
+    private function formatReprintDataKarton($penjualan, $products)
+    {
+        // <div class='header'>------- " . Carbon::now()->setTimezone('Asia/Jakarta')->format('d/m/Y') . " -------</div>";
+        $kasirName = auth()->user()->name;
+        $output = "
+            <html>
+                <head>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            width: 58mm; 
+                            margin: 0 auto; 
+                        }
+                        .header-item { 
+                            display: flex; 
+                            justify-content: space-between;
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .header { 
+                            text-align: center; 
+                            margin-bottom: 10px; 
+                            font-size: 10px; 
+                        }
+                        .products { 
+                            margin-top: 5px; 
+                        }
+                        .product-item { 
+                            display: flex; 
+                            justify-content: space-between; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .addon-item { 
+                            display: flex; 
+                            justify-content: start; 
+                            margin-top: 2px; 
+                            margin-bottom: 2px; 
+                            font-size: 10px; 
+                        }
+                        .total { 
+                            margin-top: 8px; 
+                            font-weight: bold; 
+                        }
+                        .separator { 
+                            margin-top: 5px; 
+                            border-top: 1px dashed black; 
+                        }
+                        .separator-second {
+                            margin-top: -5px; 
+                            border-top: 1px dashed black; 
+                        }
+                    </style>
+                </head>
+                <body>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>***</span>";
+        $output .= "<span>SINAR SURYA</span>";
+        $output .= "<span>***</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>*</span>";
+        $output .= "<span>JL. PASAR BARU NO. 42</span>";
+        $output .= "<span>*</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item'>";
+        $output .= "<span>***</span>";
+        $output .= "<span>BOGOR</span>";
+        $output .= "<span>***</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header-item' style='margin-bottom: 15px;'>";
+        $output .= "<span>TELP. (0251)8324647</span>";
+        $output .= "<span>FAX. (0251) 835702</span>";
+        $output .= "</div>";
+
+        $output .= "<div class='header'>------- " . Carbon::parse($penjualan['tanggal'])->format('d/m/Y') . " ({$penjualan['jam']}) -------</div>";
+        
+        foreach ($products as $product) {
+            // dd($product['order']);
+            $output .= "<div class='product-item'>";
+            $output .= "<span>{$product['nama']}</span>";
+            if ($product['order'] <= 1) {
+                $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+            }
+            $output .= "</div>";
+            if ($product['order'] > 1) {
+                $output .= "<div class='product-item'>";
+                $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format($product['harga'], 0, ',', '.') . "</span>";
+                $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
+                $output .= "</div>";
+            }
+        }
+        
+        $output .= "<div class='separator'></div>";
+        $output .= "<div class='product-item' style='margin-top: 7px;'>";
+        $output .= "<span>TOTAL</span>";
+        $output .= "<span>" . number_format(array_sum(array_column($products, 'grand_total')), 0, ',', '.') . "</span>";
+        $output .= "</div>";
+        $output .= "<div class='product-item'>";
+        $output .= "<span class='total'>" . auth()->user()->name . "</span>";
+        $output .= "<span class='total'>( NO#:{$penjualan['no']} )</span>";
+        $output .= "<span class='total'>QTY: " . array_sum(array_column($products, 'order')) . "</span>";
+        $output .= "</div>";
+        $output .= "<div class='header total' style='margin-top: 10px;'>(** REPRINT **)</div>";
+        $output .= "<div class='separator'></div>";
+        $output .= "<div class='separator-second'></div>";
+
+        // Pisahkan data VOD dan RTN
+        $vodItems = array_filter($products, fn($item) => $item['label'] === 'VOD');
+        $rtnItems = array_filter($products, fn($item) => $item['label'] === 'RTN');
+        $discItems = array_filter($products, fn($item) => $item['diskon'] != 0);
+
+        // VOD section
+        if (!empty($vodItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>VOID</span>";
+            $output .= "<span style='margin-left: 10px;'>: AMIN 999999</span>";
+            $output .= "</div>";
+            foreach ($vodItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] == -1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] < -1) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+        }
+
+        // RTN section
+        if (!empty($rtnItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>RETUR</span>";
+            $output .= "<span style='margin-left: 5px;'>: AMIN 999999</span>";
+            $output .= "</div>";
+            foreach ($rtnItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] == -1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] < -1) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    $output .= "</div>";
+                }
+            }
+        }
+
+        // Discount Section
+        if (!empty($discItems)) {
+            $output .= "<div style='margin-top: 60px;'></div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>KASIR</span>";
+            $output .= "<span style='margin-left: 5px;'>: {$kasirName}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>JAM</span>";
+            $output .= "<span style='margin-left: 16px;'>: {$penjualan['jam']}</span>";
+            $output .= "</div>";
+            $output .= "<div class='addon-item' style='margin-top: 2px;'>";
+            $output .= "<span>DISKON</span>";
+            $output .= "<span style='margin-left: 3px;'>: HARYANTO</span>";
+            $output .= "</div>";
+            foreach ($discItems as $item) {
+                $output .= "<div style='margin-top: 2px;'>";
+                $output .= "<div class='product-item'>";
+                $output .= "<span>{$item['nama']}</span>";
+                if ($item['order'] <= 1) {
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
+                    
+                }
+                $output .= "</div>";
+                if ($item['order'] > 1) {
+                    $output .= "<div class='product-item'>";
+                    $output .= "<span style='margin-left: 20px;'>" . abs($item['order']) . " X " . number_format(abs($item['harga']), 0, ',', '.') . "</span>";
+                    $output .= "<span>" . number_format(abs($item['grand_total']), 0, ',', '.') . "</span>";
                     $output .= "</div>";
                 }
             }

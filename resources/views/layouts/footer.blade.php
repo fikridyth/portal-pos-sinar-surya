@@ -1,6 +1,6 @@
 <footer class="text-center text-lg-start bg-body-tertiary mt-auto" style="color: black;">
     <div class="d-flex justify-content-between p-1">
-        <div class="mx-3">POS #01 - LISTI</div>
+        <div class="mx-3">POS #01 - {{ auth()->user()->name }}</div>
         <div>NETWORK</div>
         <div>© 2024 Copyright: <a class="text-reset fw-bold" href="#">DigiBiz Indonesia</a></div>
         <div id="current-date"></div>
