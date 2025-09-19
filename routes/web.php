@@ -56,12 +56,12 @@ Route::middleware('auth')->group(function () {
     // list supplier
     Route::get('/list-supplier', [HomeController::class, 'listSupplier'])->name('list-supplier');
     Route::get('/index-supplier/{id}', [HomeController::class, 'indexSupplier'])->name('index-supplier');
-    Route::post('/store-return-data', [HomeController::class, 'storeReturnData'])->name('store-return-data');
+    Route::post('/store-return-data', [HomeController::class, 'storeReturnData'])->middleware('check.server')->name('store-return-data');
 
     // list kredit
     Route::get('/list-kredit', [HomeController::class, 'listKredit'])->name('list-kredit');
     Route::get('/index-kredit/{id}', [HomeController::class, 'indexKredit'])->name('index-kredit');
-    Route::post('/store-kredit-data', [HomeController::class, 'storeKreditData'])->name('store-kredit-data');
+    Route::post('/store-kredit-data', [HomeController::class, 'storeKreditData'])->middleware('check.server')->name('store-kredit-data');
 
     // list barang
     Route::get('/list-barang', [HomeController::class, 'listBarang'])->name('list-barang');
@@ -83,7 +83,7 @@ Route::middleware('auth')->group(function () {
     // end of day
     Route::get('/end-of-day', [HomeController::class, 'endOfDay'])->name('end-of-day');
     Route::get('/index-end-of-day', [HomeController::class, 'indexEndOfDay'])->name('index-end-of-day');
-    Route::post('/process-end-of-day', [ScheduleController::class, 'endOfDay'])->name('process-end-of-day');
+    Route::post('/process-end-of-day', [ScheduleController::class, 'endOfDay'])->middleware('check.server')->name('process-end-of-day');
 
     // qztray
     Route::post('/sign-message', [QzTrayController::class, 'signMessage']);

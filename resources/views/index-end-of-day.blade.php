@@ -88,6 +88,8 @@
                         window.location.href = '/';
                     } else {
                         alert('Data gagal dikirim ke server, silahkan cek koneksi!'); // Tampilkan pesan gagal dari server
+                        button.disabled = false;
+                        button.innerText = 'PROSES';
                     }
                 })
                 .catch(error => {

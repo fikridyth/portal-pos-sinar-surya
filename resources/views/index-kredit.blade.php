@@ -958,11 +958,12 @@
                     },
                     body: detail, // Send the collected product details
                 })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                .then(async response => {
+                    const data = await response.json();
+                    if (data.error) {
+                        throw new Error(data.error);
                     }
-                    return response.json(); // or response.text() based on your response
+                    return data;
                 })
                 .then(data => {
                     // alert(data)
@@ -975,7 +976,8 @@
                     });
                 })
                 .catch(error => {
-                    console.error('There was a problem with the fetch operation:', error);
+                    console.error('Fetch error:', error);
+                    alert('❌ Gagal menyimpan data: ' + error.message);
                 });
         }
     // store data ke tabel pengembalian server
