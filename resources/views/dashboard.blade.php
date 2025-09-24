@@ -1438,7 +1438,7 @@
         });
 
         function printReceipt(printData) {
-            var cfg = qz.configs.create("EPSON LX-310 ESC/P");
+            var cfg = qz.configs.create("EPSON TM-U220 Receipt");
             var data = [{
                 type: 'raw',
                 format: 'plain',
