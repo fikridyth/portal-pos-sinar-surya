@@ -86,6 +86,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/process-end-of-day', [ScheduleController::class, 'endOfDay'])->middleware('check.server')->name('process-end-of-day');
 
     // qztray
-    Route::post('/sign-message', [QzTrayController::class, 'signMessage']);
-    Route::get('/cert.pem', [QzTrayController::class, 'getCertificate']);
+    Route::post('/qz/sign', [QzTrayController::class, 'sign']);
 });

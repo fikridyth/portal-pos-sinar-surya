@@ -6,32 +6,15 @@ use Illuminate\Http\Request;
 
 class QzTrayController extends Controller
 {
-    public function signMessage(Request $request)
+    public function sign(Request $request)
     {
-        $message = $request->getContent();
+        $privateKey = file_get_contents(storage_path('app/qz/private-key.pem'));
 
-        $privateKeyPath = storage_path('app/public/qztray/certificate-key.pem');
-        $privateKey = openssl_pkey_get_private(file_get_contents($privateKeyPath));
+        $data = $request->input('request');
+        $signature = null;
 
-        if (!$privateKey) {
-            return response("Invalid private key", 500);
-        }
-
-        openssl_sign($message, $signature, $privateKey, OPENSSL_ALGO_SHA256);
-        openssl_free_key($privateKey);
+        openssl_sign($data, $signature, $privateKey, OPENSSL_ALGO_SHA1);
 
         return base64_encode($signature);
-    }
-
-    public function getCertificate()
-    {
-        $certPath = storage_path('app/public/qztray/cert.pem');
-        if (!file_exists($certPath)) {
-            return response("File tidak ditemukan di: $certPath", 404);
-        }
-
-        return response()->file($certPath, [
-            'Content-Type' => 'application/x-x509-ca-cert'
-        ]);
     }
 }
