@@ -142,12 +142,54 @@
             }
         });
 
+        qz.security.setCertificatePromise(function(resolve, reject) {
+            fetch("/qz/digital-certificate.txt")
+                .then(resp => resp.text())
+                .then(cert => {
+                    console.log("✅ Certificate loaded:", cert.substring(0, 50) + "...");
+                    resolve(cert);
+                })
+                .catch(err => {
+                    console.error("❌ Certificate error:", err);
+                    reject(err);
+                });
+        });
+
+        qz.security.setSignaturePromise(function(toSign) {
+            return function(resolve, reject) {
+                console.log("📝 Data to sign:", toSign);
+                $.post("/qz/sign", { request: toSign })
+                    .done(signature => {
+                        console.log("✅ Signature returned:", signature.substring(0, 30) + "...");
+                        resolve(signature);
+                    })
+                    .fail(err => {
+                        console.error("❌ Signature error:", err);
+                        reject(err);
+                    });
+            };
+        });
+
         function printReceipt(printData) {
-            // Open a new window or use a printing library to send the print data to the thermal printer
-            const printWindow = window.open('', '', 'height=400,width=300');
-            printWindow.document.write('<pre>' + printData + '</pre>');
-            printWindow.document.close();
-            printWindow.print();
+            var cfg = qz.configs.create("EPSON TM-U220 Receipt");
+            var data = [{
+                type: 'html',
+                format: 'plain',
+                data: printData + "\n\n\n"
+            }];
+
+            function doPrint() {
+                console.log("🖨 Sending data to printer:", data);
+                return qz.print(cfg, data).then(() => {
+                    console.log("✅ Print job sent");
+                }).catch(err => console.error("❌ Print error:", err));
+            }
+
+            if (!qz.websocket.isActive()) {
+                qz.websocket.connect().then(doPrint);
+            } else {
+                doPrint();
+            }
         }
     </script>
 @endsection

@@ -1438,33 +1438,11 @@
         });
 
         function printReceipt(printData) {
-            const htmlContent = `
-                <html>
-                    <head>
-                        <title>Struk Pembayaran</title>
-                        <style>
-                            body {
-                                font-family: monospace;
-                                font-size: 14px;
-                                margin: 0;
-                                padding: 10px;
-                            }
-                            pre {
-                                white-space: pre-wrap; /* Mengatur spasi */
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <pre>${printData}</pre>
-                    </body>
-                </html>
-            `;
-
             var cfg = qz.configs.create("EPSON TM-U220 Receipt");
             var data = [{
                 type: 'html',
                 format: 'plain',
-                data: htmlContent + "\n"
+                data: printData + "\n\n\n"
             }];
 
             function doPrint() {

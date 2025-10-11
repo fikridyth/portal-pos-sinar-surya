@@ -191,14 +191,14 @@ class HomeController extends Controller
             // dd($products);
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
-            if ($product['order'] <= 1) {
+            if ($product['order'] == 1) {
                 $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
                 
             }
             $output .= "</div>";
-            if ($product['order'] > 1) {
+            if ($product['order'] > 1 || $product['order'] < 0) {
                 $output .= "<div class='product-item'>";
-                $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format($product['harga'], 0, ',', '.') . "</span>";
+                $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format(abs($product['harga']), 0, ',', '.') . "</span>";
                 $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
                 $output .= "</div>";
             }
@@ -354,6 +354,10 @@ class HomeController extends Controller
     {
         // dd($request->all());
         $products = $request->input('products');
+        if (isset($products['nama'])) {
+            // Hanya satu produk (bukan array of array), bungkus ke array
+            $products = [$products];
+        }
         $sequence = '000001';
         $getLastPo = Penjualan::max("no");
         if ($getLastPo) {
@@ -377,7 +381,7 @@ class HomeController extends Controller
             'created_by' => auth()->user()->name
         ];
 
-        // dd($products);
+        // dd($dataPenjualan, $products);
         if ($products == []) {
             return response()->json(['error' => 'No data scanned!']);
         }
@@ -471,12 +475,12 @@ class HomeController extends Controller
             // dd($products);
             $output .= "<div class='product-item'>";
             $output .= "<span>{$product['nama']}</span>";
-            if ($product['order'] <= 1) {
+            if ($product['order'] == 1) {
                 $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
                 
             }
             $output .= "</div>";
-            if ($product['order'] > 1) {
+            if ($product['order'] > 1 || $product['order'] < 0) {
                 $output .= "<div class='product-item'>";
                 $output .= "<span style='margin-left: 20px;'>{$product['order']} X ". number_format($product['harga'], 0, ',', '.') . "</span>";
                 $output .= "<span>" . number_format($product['grand_total'], 0, ',', '.') . "</span>";
@@ -1381,8 +1385,8 @@ class HomeController extends Controller
                             font-family: Arial, sans-serif; 
                             width: 58mm; 
                             margin: 0; /* agar konten rapat ke kiri */
-                            padding: 20; /* supaya tidak ada jarak padding */
-                            text-align: left; /* pastikan teks rata kiri */
+                            font-size: 10px;
+                            margin-left: 40px;
                         }
                         .separator { 
                             margin-top: 5px; 
@@ -1540,46 +1544,50 @@ class HomeController extends Controller
             });
 
             
-        $penjualansDua = PenjualanThird::get()
-            ->groupBy('tanggal')
-            ->map(function ($items) {
-                $pluTotal = 0;
-                $vodTotal = 0;
-                $rtnTotal = 0;
-        
-                foreach ($items as $item) {
-                    // Pastikan detail sudah di-decode jadi array
-                    $details = is_string($item->detail) ? json_decode($item->detail, true) : $item->detail;
-        
-                    foreach ($details as $detail) {
-                        switch ($detail['label']) {
-                            case 'PLU':
-                                $pluTotal += $detail['total'];
-                                break;
-                            case 'VOD':
-                                $vodTotal += abs($detail['total']);  // ambil nilai absolut (positif)
-                                break;
-                            case 'RTN':
-                                $rtnTotal += abs($detail['total']);  // ambil nilai absolut (positif)
-                                break;
+        try {
+            $penjualansDua = PenjualanThird::get()
+                ->groupBy('tanggal')
+                ->map(function ($items) {
+                    $pluTotal = 0;
+                    $vodTotal = 0;
+                    $rtnTotal = 0;
+
+                    foreach ($items as $item) {
+                        $details = is_string($item->detail) ? json_decode($item->detail, true) : $item->detail;
+
+                        foreach ($details as $detail) {
+                            switch ($detail['label']) {
+                                case 'PLU':
+                                    $pluTotal += $detail['total'];
+                                    break;
+                                case 'VOD':
+                                    $vodTotal += abs($detail['total']);
+                                    break;
+                                case 'RTN':
+                                    $rtnTotal += abs($detail['total']);
+                                    break;
+                            }
                         }
                     }
-                }
-        
-                return [
-                    'tanggal' => $items->pluck('tanggal')->first(),
-                    'created_by' => $items->pluck('created_by')->first(),
-                    'grand_total' => $items->sum('grand_total'),
-                    'diskon' => $items->sum('diskon'),
-                    'jam' => $items->max('jam'),
-                    'transaksi' => count($items),
-        
-                    // Tambahan per label
-                    'total' => $pluTotal,
-                    'void' => $vodTotal,
-                    'return' => $rtnTotal,
-                ];
-            });
+
+                    return [
+                        'tanggal' => $items->pluck('tanggal')->first(),
+                        'created_by' => $items->pluck('created_by')->first(),
+                        'grand_total' => $items->sum('grand_total'),
+                        'diskon' => $items->sum('diskon'),
+                        'jam' => $items->max('jam'),
+                        'transaksi' => count($items),
+                        'total' => $pluTotal,
+                        'void' => $vodTotal,
+                        'return' => $rtnTotal,
+                    ];
+                });
+        } catch (\Exception $e) {
+            // Jika gagal, set sebagai collection kosong
+            Log::error("Koneksi store ke mysql_third gagal: " . $e->getMessage());
+            $penjualansDua = collect();
+        }
+
         $printData = $this->formatCetakKasir($penjualans, $penjualansDua);
 
         return response()->json(['printData' => $printData]);
@@ -1596,8 +1604,8 @@ class HomeController extends Controller
                             font-family: Arial, sans-serif; 
                             width: 58mm; 
                             margin: 0; /* agar konten rapat ke kiri */
-                            padding: 20; /* supaya tidak ada jarak padding */
-                            text-align: left; /* pastikan teks rata kiri */
+                            font-size: 10px;
+                            margin-left: 40px;
                         }
                         .separator { 
                             margin-top: 5px; 

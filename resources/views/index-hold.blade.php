@@ -751,35 +751,51 @@
         // store data ke tabel penjualan
 
         // cetak data
+        // QZ setup
+        qz.security.setCertificatePromise(function (resolve, reject) {
+            fetch("/qz/digital-certificate.txt")
+                .then(resp => resp.text())
+                .then(cert => {
+                    resolve(cert);
+                })
+                .catch(err => {
+                    console.error("Certificate error:", err);
+                    reject(err);
+                });
+        });
+
+        qz.security.setSignaturePromise(function (toSign) {
+            return function (resolve, reject) {
+                $.post("/qz/sign", { request: toSign })
+                    .done(signature => {
+                        resolve(signature);
+                    })
+                    .fail(err => {
+                        console.error("Signature error:", err);
+                        reject(err);
+                    });
+            };
+        });
+
         function printReceipt(printData) {
-            // Membuka jendela baru untuk pencetakan
-            const printWindow = window.open('', '', 'height=400,width=300');
+            var cfg = qz.configs.create("EPSON TM-U220 Receipt");
+            var data = [{
+                type: 'html',
+                format: 'plain',
+                data: printData + "\n\n\n"
+            }];
 
-            // Menyusun isi struk dalam format HTML
-            printWindow.document.write(`
-                                <html>
-                                    <head>
-                                        <title>Struk Pembayaran</title>
-                                        <style>
-                                            body {
-                                                font-family: monospace;
-                                                font-size: 12px;
-                                                margin: 0;
-                                                padding: 10px;
-                                            }
-                                            pre {
-                                                white-space: pre-wrap; /* Mengatur spasi */
-                                            }
-                                        </style>
-                                    </head>
-                                    <body>
-                                        <pre>${printData}</pre>
-                                    </body>
-                                </html>
-                            `);
+            function doPrint() {
+                return qz.print(cfg, data).then(() => {
+                    console.log("✅ Print job sent");
+                }).catch(err => console.error("❌ Print error:", err));
+            }
 
-            printWindow.document.close();
-            printWindow.print();
+            if (!qz.websocket.isActive()) {
+                qz.websocket.connect().then(doPrint);
+            } else {
+                doPrint();
+            }
         }
         // cetak data
 

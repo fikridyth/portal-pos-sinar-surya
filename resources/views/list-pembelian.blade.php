@@ -97,24 +97,23 @@
         let activeDataId = null;
 
         document.querySelectorAll('.preorder-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
+            checkbox.addEventListener('change', function () {
                 const detail = JSON.parse(this.getAttribute('data-detail'));
                 const dataId = JSON.parse(this.getAttribute('data-id'));
                 const grandTotal = JSON.parse(this.getAttribute('data-total'));
                 const tbody = document.getElementById('orderDetailTableBody');
                 const totalCell = document.querySelector('.table tbody tr th.value-total');
-                
-                document.querySelectorAll('.preorder-checkbox').forEach(otherCheckbox => {
-                    if (otherCheckbox !== this) {
-                        otherCheckbox.checked = false;
-                    }
+
+                // Hanya izinkan 1 checkbox aktif
+                document.querySelectorAll('.preorder-checkbox').forEach(cb => {
+                    if (cb !== this) cb.checked = false;
                 });
 
                 if (this.checked) {
                     tbody.innerHTML = '';
                     let enableKarton = false;
+
                     JSON.parse(detail).forEach(item => {
-                        // console.log(item);
                         const newRow = document.createElement('tr');
                         newRow.innerHTML = `
                             <td class="text-black">${item.nama}</td>
@@ -124,12 +123,13 @@
                             <td class="text-end text-black" style="width: 100px;">${number_format(item.grand_total)}</td>
                         `;
                         tbody.appendChild(newRow);
+
+                        // Enable tombol karton jika /P[angka] > 1
                         const match = item.nama.match(/\/P(\d+)$/);
                         if (match && parseInt(match[1], 10) > 1) {
                             enableKarton = true;
                         }
                     });
-
 
                     const linkKarton = document.getElementById('linkKarton');
                     if (enableKarton) {
@@ -138,138 +138,153 @@
                         linkKarton.style.opacity = '1';
                     } else {
                         linkKarton.classList.add('disabled');
-                        linkKarton.style.pointerEvents = 'none'; // Ini benar-benar memblok klik
-                        linkKarton.style.opacity = '0.5'; // Untuk efek visual
+                        linkKarton.style.pointerEvents = 'none';
+                        linkKarton.style.opacity = '0.5';
                     }
 
                     totalCell.textContent = number_format(grandTotal);
-                    const currentCheckbox = this;
-                    const currentDetail = detail;
-                    
+
                     activeCheckbox = this;
                     activeDetail = detail;
                     activeDataId = dataId;
-
-                    document.addEventListener('keydown', function(event) {
-                        if (!activeCheckbox) return;
-                        if (event.key === 'c' || event.key === 'C') {
-                            event.preventDefault();
-                            const id = currentCheckbox.closest('tr').dataset.id;
-
-                            // AJAX request to your server
-                            fetch('/reprint-pembelian', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
-                                },
-                                body: JSON.stringify({ id: activeDataId, detail: activeDetail })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                printReceipt(data.printData);
-                            })
-                            .catch(error => console.error('Error:', error));
-                        }
-                    }, { once: true });
-
-                    document.getElementById('linkKarton').addEventListener('click', function(event) {
-                        event.preventDefault(); // Prevent default action of the link
-                        if (!activeCheckbox) return;
-                        const id = currentCheckbox.closest('tr').dataset.id;
-
-                        // AJAX request to your server
-                        fetch('/reprint-pembelian-karton', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
-                            },
-                            body: JSON.stringify({ id: activeDataId, detail: activeDetail })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            printReceipt(data.printData); // Assuming this function exists to handle printing the receipt
-                        })
-                        .catch(error => console.error('Error:', error));
-                    });
-
-                    document.addEventListener('keydown', function(event) {
-                        if (!activeCheckbox) return;
-                        if (event.key === 'v' || event.key === 'V') {
-                            event.preventDefault();
-                            const id = currentCheckbox.closest('tr').dataset.id;
-
-                            // AJAX request to your server
-                            fetch('/reprint-pembelian-karton', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
-                                },
-                                body: JSON.stringify({ id: activeDataId, detail: activeDetail })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                printReceipt(data.printData);
-                            })
-                            .catch(error => console.error('Error:', error));
-                        }
-                    }, { once: true });
-
-                    document.getElementById('linkPilih').addEventListener('click', function(event) {
-                        event.preventDefault(); // Prevent default action of the link
-                        if (!activeCheckbox) return;
-                        const id = currentCheckbox.closest('tr').dataset.id;
-
-                        // AJAX request to your server
-                        fetch('/reprint-pembelian', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // Add CSRF token if needed
-                            },
-                            body: JSON.stringify({ id: activeDataId, detail: activeDetail })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            printReceipt(data.printData); // Assuming this function exists to handle printing the receipt
-                        })
-                        .catch(error => console.error('Error:', error));
-                    });
                 } else {
                     tbody.innerHTML = '';
                     totalCell.textContent = '0';
-
                     activeCheckbox = null;
                     activeDetail = null;
                     activeDataId = null;
                 }
             });
-
-            function printReceipt(printData) {
-                // Open a new window or use a printing library to send the print data to the thermal printer
-                const printWindow = window.open('', '', 'height=400,width=300');
-                printWindow.document.write('<pre>' + printData + '</pre>');
-                printWindow.document.close();
-                printWindow.print();
-            }
-
-            function number_format(number) {
-                return Number(number).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            }
         });
 
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'r' || event.key === 'R') {
+        // Tombol CETAK
+        document.getElementById('linkPilih').addEventListener('click', function (event) {
+            event.preventDefault();
+            if (!activeCheckbox) return;
+            cetakStruk();
+        });
+
+        // Tombol CETAK KARTON
+        document.getElementById('linkKarton').addEventListener('click', function (event) {
+            event.preventDefault();
+            if (!activeCheckbox) return;
+            cetakKarton();
+        });
+
+        // Keyboard shortcut
+        document.addEventListener('keydown', function (event) {
+            if (!activeCheckbox) return;
+
+            if (event.key === 'c' || event.key === 'C') {
+                event.preventDefault();
+                cetakStruk();
+            }
+
+            if (event.key === 'v' || event.key === 'V') {
+                event.preventDefault();
+                cetakKarton();
+            }
+
+            if (event.key === 'r' || event.key === 'R' || event.key === '>' || event.key === '.') {
                 event.preventDefault();
                 window.location.href = '/dashboard';
             }
-
-            if (event.key === '>' || event.key === '.') {
-                event.preventDefault();
-                window.location.href = '/dashboard';
-            }
         });
+
+        function cetakStruk() {
+            fetch('/reprint-pembelian', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ id: activeDataId, detail: activeDetail })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    printReceipt(data.printData);
+                    // resetAfterPrint();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function cetakKarton() {
+            fetch('/reprint-pembelian-karton', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ id: activeDataId, detail: activeDetail })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    printReceipt(data.printData);
+                    // resetAfterPrint();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function number_format(number) {
+            return Number(number).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Optional: Reset tampilan setelah cetak (bisa aktifkan jika perlu)
+        function resetAfterPrint() {
+            if (activeCheckbox) activeCheckbox.checked = false;
+            document.getElementById('orderDetailTableBody').innerHTML = '';
+            document.querySelector('.table tbody tr th.value-total').textContent = '0';
+            activeCheckbox = null;
+            activeDetail = null;
+            activeDataId = null;
+        }
+
+        // QZ setup
+        qz.security.setCertificatePromise(function (resolve, reject) {
+            fetch("/qz/digital-certificate.txt")
+                .then(resp => resp.text())
+                .then(cert => {
+                    resolve(cert);
+                })
+                .catch(err => {
+                    console.error("Certificate error:", err);
+                    reject(err);
+                });
+        });
+
+        qz.security.setSignaturePromise(function (toSign) {
+            return function (resolve, reject) {
+                $.post("/qz/sign", { request: toSign })
+                    .done(signature => {
+                        resolve(signature);
+                    })
+                    .fail(err => {
+                        console.error("Signature error:", err);
+                        reject(err);
+                    });
+            };
+        });
+
+        function printReceipt(printData) {
+            var cfg = qz.configs.create("EPSON TM-U220 Receipt");
+            var data = [{
+                type: 'html',
+                format: 'plain',
+                data: printData + "\n\n\n"
+            }];
+
+            function doPrint() {
+                return qz.print(cfg, data).then(() => {
+                    console.log("✅ Print job sent");
+                }).catch(err => console.error("❌ Print error:", err));
+            }
+
+            if (!qz.websocket.isActive()) {
+                qz.websocket.connect().then(doPrint);
+            } else {
+                doPrint();
+            }
+        }
     </script>
+
 @endsection

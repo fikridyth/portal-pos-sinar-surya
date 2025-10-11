@@ -982,98 +982,51 @@
         }
     // store data ke tabel pengembalian server
 
+    // QZ setup
+        qz.security.setCertificatePromise(function (resolve, reject) {
+            fetch("/qz/digital-certificate.txt")
+                .then(resp => resp.text())
+                .then(cert => {
+                    resolve(cert);
+                })
+                .catch(err => {
+                    console.error("Certificate error:", err);
+                    reject(err);
+                });
+        });
+
+        qz.security.setSignaturePromise(function (toSign) {
+            return function (resolve, reject) {
+                $.post("/qz/sign", { request: toSign })
+                    .done(signature => {
+                        resolve(signature);
+                    })
+                    .fail(err => {
+                        console.error("Signature error:", err);
+                        reject(err);
+                    });
+            };
+        });
+
         function printReceipt(printData) {
-            const htmlContent = `
-                <html>
-                    <head>
-                        <title>Struk Pembayaran</title>
-                        <style>
-                            body {
-                                font-family: monospace;
-                                font-size: 14px;
-                                margin: 0;
-                                padding: 10px;
-                            }
-                            pre {
-                                white-space: pre-wrap; /* Mengatur spasi */
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <pre>${printData}</pre>
-                    </body>
-                </html>
-            `;
+            var cfg = qz.configs.create("EPSON TM-U220 Receipt");
+            var data = [{
+                type: 'html',
+                format: 'plain',
+                data: printData + "\n\n\n"
+            }];
 
-            const printWindow = window.open('', '', 'height=400,width=300');
-            printWindow.document.write('<pre>' + printData + '</pre>');
-            printWindow.document.close();
-            printWindow.print();
+            function doPrint() {
+                return qz.print(cfg, data).then(() => {
+                    console.log("✅ Print job sent");
+                }).catch(err => console.error("❌ Print error:", err));
+            }
 
-            // qz.security.setSignaturePromise(function (toSign) {
-            //     return function (resolve, reject) {
-            //         console.log("🔐 Requesting signature for:", toSign); // Log toSign yang akan ditandatangani
-
-            //         fetch("/sign-message", {
-            //             method: "POST",
-            //             headers: {
-            //                 'Content-Type': 'text/plain'
-            //             },
-            //             body: toSign
-            //         })
-            //         .then(response => response.text())
-            //         .then(signature => {
-            //             console.log("✅ Signature received:", signature); // Log signature yang diterima
-            //             resolve(signature);
-            //         })
-            //         .catch(err => {
-            //             console.error("🔥 Error requesting signature:", err);
-            //             reject(err);
-            //         });
-            //     };
-            // });
-
-            // qz.security.setCertificatePromise(function (resolve, reject) {
-            //     console.log("🔑 Requesting certificate from /cert.pem...");
-
-            //     fetch("/cert.pem")
-            //         .then(response => {
-            //             if (!response.ok) {
-            //                 console.error("❌ Failed to fetch certificate, status:", response.status);
-            //                 reject("Failed to fetch certificate with status " + response.status);
-            //                 return;
-            //             }
-            //             return response.text();
-            //         })
-            //         .then(cert => {
-            //             console.log("✅ Certificate received:", cert); // LOG sertifikat
-            //             resolve(cert);
-            //         })
-            //         .catch(err => {
-            //             console.error("🔥 Error fetching certificate:", err); // LOG error
-            //             reject(err);
-            //         });
-            // });
-
-            // // Menghubungkan dengan QZ Tray dan mengirimkan HTML untuk dicetak
-            // qz.websocket.connect().then(() => {
-            //     const config = qz.configs.create("EPSON TM-U220 Receipt"); // Ganti sesuai nama printer
-            //     const payload = [
-            //         {
-            //             type: 'html',
-            //             format: 'plain',
-            //             data: htmlContent + "\n" // Tambah feed kertas
-            //         }
-            //     ];
-
-            //     return qz.print(config, payload);
-            // }).then(() => {
-            //     console.log("Struk berhasil dicetak.");
-            //     qz.websocket.disconnect(); // Tutup koneksi jika tidak ada cetakan berikutnya
-            // }).catch(err => {
-            //     console.error("Gagal cetak:", err);
-            //     alert("Gagal mencetak: Pastikan QZ Tray sedang aktif.");
-            // });
+            if (!qz.websocket.isActive()) {
+                qz.websocket.connect().then(doPrint);
+            } else {
+                doPrint();
+            }
         }
     // cetak data
 
