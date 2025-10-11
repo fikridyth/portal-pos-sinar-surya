@@ -23,6 +23,13 @@ class ProductDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         // return (new EloquentDataTable($query->whereNotNull('kode_alternatif')->where('kode_alternatif', '!=', '')->orderBy('created_at', 'desc')))
+        if (request()->has('search') && request()->input('search.value') != '') {
+            $search = request()->input('search.value');
+        
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', $search . '%');
+            });
+        }
         return (new EloquentDataTable($query->where('status', 1)->orderBy('id', 'asc')))
         ->addIndexColumn()
         ->editColumn('created_at', function ($row) {
