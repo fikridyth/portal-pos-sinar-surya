@@ -1271,13 +1271,13 @@
 
                         printReceipt(data.printData);
 
-                        // Clear localStorage on page unload
-                        // window.addEventListener('beforeunload', function() {
-                            // localStorage.removeItem('productDetails');
-                            // localStorage.removeItem('grandTotal');
-                            // localStorage.removeItem('grandDiskon');
-                            // localStorage.removeItem('grandTotalDiskon');
-                        // });
+                        window.addEventListener('beforeunload', function() {
+                            localStorage.removeItem('productDetails');
+                            localStorage.removeItem('grandTotal');
+                            localStorage.removeItem('grandDiskon');
+                            localStorage.removeItem('grandTotalDiskon');
+                        });
+                        location.reload();
                     }
                 })
                 .catch(error => {
@@ -1341,13 +1341,13 @@
 
                         printReceipt(data.printData);
 
-                        // Clear localStorage on page unload
-                        // window.addEventListener('beforeunload', function() {
-                            // localStorage.removeItem('productDetails');
-                            // localStorage.removeItem('grandTotal');
-                            // localStorage.removeItem('grandDiskon');
-                            // localStorage.removeItem('grandTotalDiskon');
-                        // });
+                        window.addEventListener('beforeunload', function() {
+                            localStorage.removeItem('productDetails');
+                            localStorage.removeItem('grandTotal');
+                            localStorage.removeItem('grandDiskon');
+                            localStorage.removeItem('grandTotalDiskon');
+                        });
+                        location.reload();
                     }
                 })
                 .catch(error => {
@@ -1398,7 +1398,6 @@
                         localStorage.removeItem('grandDiskon');
                         localStorage.removeItem('grandTotalDiskon');
                     });
-
                     location.reload()
                 }
             })
