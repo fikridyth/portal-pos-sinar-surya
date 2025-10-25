@@ -1271,13 +1271,16 @@
 
                         printReceipt(data.printData);
 
-                        window.addEventListener('beforeunload', function() {
-                            localStorage.removeItem('productDetails');
-                            localStorage.removeItem('grandTotal');
-                            localStorage.removeItem('grandDiskon');
-                            localStorage.removeItem('grandTotalDiskon');
-                        });
-                        location.reload();
+                        // ✅ Clear local storage
+                        localStorage.removeItem('productDetails');
+                        localStorage.removeItem('grandTotal');
+                        localStorage.removeItem('grandDiskon');
+                        localStorage.removeItem('grandTotalDiskon');
+
+                        // ✅ Tunggu 2 detik sebelum reload
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
                     }
                 })
                 .catch(error => {
@@ -1347,7 +1350,11 @@
                             localStorage.removeItem('grandDiskon');
                             localStorage.removeItem('grandTotalDiskon');
                         });
-                        location.reload();
+
+                        // ✅ Tunggu 2 detik sebelum reload
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
                     }
                 })
                 .catch(error => {
@@ -1398,7 +1405,11 @@
                         localStorage.removeItem('grandDiskon');
                         localStorage.removeItem('grandTotalDiskon');
                     });
-                    location.reload()
+                    
+                    // ✅ Tunggu 2 detik sebelum reload
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
                 }
             })
             .catch(error => {
