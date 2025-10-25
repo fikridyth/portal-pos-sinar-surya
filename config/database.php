@@ -65,9 +65,7 @@ return [
 
         'mysql_second' => [
             'driver' => 'mysql',
-            'url' => env('DATABASE_URL'),
-            'host' => env('DB_SECOND_HOST', '192.168.0.66'),
-            // 'host' => env('DB_SECOND_HOST', '127.0.0.1'),
+            'host' => env('DB_SECOND_HOST', '127.0.0.1'),
             'port' => env('DB_SECOND_PORT', '3306'),
             'database' => env('DB_SECOND_DATABASE', 'forge'),
             'username' => env('DB_SECOND_USERNAME', 'forge'),
@@ -87,8 +85,6 @@ return [
 
         'mysql_third' => [
             'driver' => 'mysql',
-            'url' => env('DATABASE_URL'),
-            // 'host' => env('DB_THIRD_HOST', '192.168.0.63'),
             'host' => env('DB_THIRD_HOST', '127.0.0.1'),
             'port' => env('DB_THIRD_PORT', '3306'),
             'database' => env('DB_THIRD_DATABASE', 'forge'),
@@ -102,6 +98,7 @@ return [
             'strict' => true,
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::ATTR_TIMEOUT => 5,
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
         ],
